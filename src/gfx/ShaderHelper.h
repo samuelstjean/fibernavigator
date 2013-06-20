@@ -38,6 +38,7 @@ public:
     void setTextureShaderVars();
     void setMeshShaderVars();
     void setFiberShaderVars();
+	
 
 protected:
     ShaderHelper(void);

@@ -292,6 +292,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
             Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
             Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
             SceneManager::getInstance()->setTransform( transform );
+			Refresh( true );
         }
     }
     updateView();

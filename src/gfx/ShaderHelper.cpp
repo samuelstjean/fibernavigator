@@ -14,6 +14,8 @@
 #include "../gui/MainFrame.h"
 #include "../gui/SceneManager.h"
 
+
+
 ShaderHelper * ShaderHelper::m_pInstance = NULL;
 
 ShaderHelper::ShaderHelper()
@@ -86,6 +88,7 @@ void ShaderHelper::loadShaders( bool geometryShadersSupported )
     Logger::getInstance()->print( _T( "Initializing mesh shader..." ), LOGLEVEL_MESSAGE );
     if( m_pMeshShader->load() && m_pMeshShader->compileAndLink() )
     {
+
         m_pMeshShader->bind();
         Logger::getInstance()->print( _T( "Mesh shader initialized." ), LOGLEVEL_MESSAGE );
     }
@@ -289,10 +292,10 @@ void ShaderHelper::setTextureShaderVars()
 
 void ShaderHelper::setMeshShaderVars()
 {
-    m_pMeshShader->setUniInt( "blendTex", SceneManager::getInstance()->isTexBlendOnMesh() );
+    /*m_pMeshShader->setUniInt( "blendTex", SceneManager::getInstance()->isTexBlendOnMesh() );
 
     m_pMeshShader->setUniInt( "lightOn",      SceneManager::getInstance()->isLightingActive() );
-
+	
     m_pMeshShader->setUniInt( "dimX", DatasetManager::getInstance()->getColumns() );
     m_pMeshShader->setUniInt( "dimY", DatasetManager::getInstance()->getRows() );
     m_pMeshShader->setUniInt( "dimZ", DatasetManager::getInstance()->getFrames() );
@@ -333,6 +336,7 @@ void ShaderHelper::setMeshShaderVars()
     m_pMeshShader->setUniFloat( "alpha3", m_alpha[3] );
     m_pMeshShader->setUniFloat( "alpha4", m_alpha[4] );
     m_pMeshShader->setUniFloat( "alpha5", m_alpha[5] );
+*/
 
     Logger::getInstance()->printIfGLError( wxT( "ShaderHelper::setMeshShaderVars" ) );
 }

@@ -11,6 +11,12 @@ using std::ostringstream;
 
 #include "../Logger.h"
 
+#include "../main.h"
+#include "ColorRGB.h"
+#include "BitmapHandling.h"
+#include "Image.h"
+#include "textureHandling.h"
+
 ShaderProgram::ShaderProgram( wxString filename, bool useGeometryShader, bool geometryShadersSupported )
 : m_id( NULL ),
   m_name( filename ),
@@ -162,6 +168,18 @@ bool ShaderProgram::compileAndLink()
             m_oss << "ShaderProgram " << getStdStringName() << " successfully linked.";
             Logger::getInstance()->print( wxString( m_oss.str().c_str(), wxConvUTF8 ), LOGLEVEL_DEBUG );
             m_oss.str( "" );
+
+				
+	wxString name = wxT ("ColorScheme1.bmp");
+	
+	wxString iconPath = MyApp::iconsPath;
+	wxString fullname = iconPath.append(name);
+	std::string stlstring = std::string(fullname.mb_str());
+
+	Image<ColorRGB> TmpImage;
+	LoadBmp( stlstring, TmpImage);
+    mLookups[0] = LoadTexture(TmpImage);
+	std::cout << "lookup " << mLookups[0] << "\n";
             
             return true;
         }

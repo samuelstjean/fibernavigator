@@ -79,6 +79,7 @@ private:
     unsigned int m_countTimeSteps;
     unsigned int m_countPolygons;
     unsigned int m_polygonDim;
+
 };
 
 #endif /*MESH_H_*/

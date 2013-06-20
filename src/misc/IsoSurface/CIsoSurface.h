@@ -117,6 +117,7 @@ private:
 
     wxToggleButton *m_pToggleCutFrontSector;
     wxToggleButton *m_pToggleUseColoring;
+
 };
 #endif // CISOSURFACE_H
 

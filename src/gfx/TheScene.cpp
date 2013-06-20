@@ -523,6 +523,13 @@ void TheScene::renderMesh()
     ShaderHelper::getInstance()->getMeshShader()->bind();
     ShaderHelper::getInstance()->setMeshShaderVars();
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,ShaderHelper::getInstance()->getMeshShader()->mLookups[0]);
+
+    //Tell the shader that the look has been loaded in
+    //texture stage 0.
+	
+
     if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
@@ -534,9 +541,10 @@ void TheScene::renderMesh()
     //Render selection objects
     glColor3f( 1.0f, 0.0f, 0.0f );
 
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
-    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
+   // ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
+   // ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
+   // ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
+	ShaderHelper::getInstance()->getMeshShader()->setUniInt( "LookupSampler", 0);
 
     //Render meshes
     vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();
@@ -560,6 +568,10 @@ void TheScene::renderMesh()
 
     ShaderHelper::getInstance()->getMeshShader()->release();
 
+	    //Unload the texture from texture stage 0.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,NULL);
+
     lightsOff();
 
     glPopAttrib();
@@ -574,10 +586,10 @@ void TheScene::renderMeshInternal(  DatasetInfo *pDsInfo )
     wxColor color = pDsInfo->getColor();
     glColor3f( (float)color.Red() / 255.0f, (float)color.Green() / 255.0f, (float)color.Blue() / 255.0f );
 
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
-    ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
-    ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
+    //ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS",  pDsInfo->getShowFS() );
+    //ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex",  pDsInfo->getUseTex() );
+    //ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_",  pDsInfo->getAlpha() );
+    //ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "isGlyph", pDsInfo->getIsGlyph());
 
     if( pDsInfo->getAlpha() < 0.99 )
     {
@@ -719,7 +731,7 @@ void TheScene::lightsOn()
     Matrix4fT transform = SceneManager::getInstance()->getTransform();
     Vector3fMultMat4( &l, &v1, &transform );
 
-    GLfloat lightPosition0[] = { l.s.X, l.s.Y, l.s.Z, 0.0 };
+    GLfloat lightPosition0[] = { -l.s.X, -l.s.Y, -l.s.Z, 1.0 };
 
     glLightfv( GL_LIGHT0, GL_AMBIENT,  ambientLight   );
     glLightfv( GL_LIGHT0, GL_DIFFUSE,  diffuseLight   );
@@ -804,6 +816,10 @@ void TheScene::drawSelectionObjects()
     
     ShaderProgram *pMeshShader = ShaderHelper::getInstance()->getMeshShader();
     pMeshShader->bind();
+
+	
+
+
     ShaderHelper::getInstance()->setMeshShaderVars();
     
     if( SceneManager::getInstance()->isPointMode() )
@@ -813,10 +829,10 @@ void TheScene::drawSelectionObjects()
     
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    
-    pMeshShader->setUniInt  ( "showFS", true );
-    pMeshShader->setUniInt  ( "useTex", false );
-    pMeshShader->setUniFloat( "alpha_", 1.0 );
+    //
+    //pMeshShader->setUniInt  ( "showFS", true );
+    //pMeshShader->setUniInt  ( "useTex", false );
+    //pMeshShader->setUniFloat( "alpha_", 1.0 );
     
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
@@ -829,7 +845,8 @@ void TheScene::drawSelectionObjects()
     }
     
     pMeshShader->release();
-    
+   
+
     lightsOff();
     
     glPopAttrib();

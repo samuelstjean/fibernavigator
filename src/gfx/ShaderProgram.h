@@ -41,6 +41,8 @@ public:
     void setUniMatrix3f   ( const GLchar* pName, const FMatrix &values );
     void setUniSampler    ( const GLchar* pName, const GLint value );
     void setUniBool       ( const GLchar* pName, const bool value );
+
+	unsigned int mLookups[3];
     
 private:
     ShaderProgram(const ShaderProgram &);
