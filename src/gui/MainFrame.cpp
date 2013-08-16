@@ -444,6 +444,7 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     
+	m_pFMRIWindow->SetSelectButton();
     refreshAllGLWidgets();
 }
 
