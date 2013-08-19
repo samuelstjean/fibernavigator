@@ -55,6 +55,7 @@ public:
     Anatomy( const Anatomy * const pAnatomy );
     Anatomy( std::vector<float> *pDataset, const int sample );
     Anatomy( const int type );
+	Anatomy( const wxString &filename, const int type );
     virtual ~Anatomy();
 
     void add( Anatomy* anatomy);
@@ -115,6 +116,7 @@ public:
 
     bool toggleEqualization();
     void equalizationSliderChange();
+	void generateTexture();
 
 public:
     bool  m_isSegmentOn;
@@ -148,7 +150,7 @@ private:
 
     void equalizeHistogram();
 
-    void generateTexture();
+    
     void updateTexture( SubTextureBox drawZone, const bool isRound, float color );
     void updateTexture( SubTextureBox drawZone, const bool isRound, wxColor colorRGB );
     void fillHistory(const SubTextureBox drawZone, bool isRGB);
