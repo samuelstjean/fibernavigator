@@ -676,6 +676,7 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
 	return index;
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a mesh. Extension supported: .mesh, .surf and .dip
