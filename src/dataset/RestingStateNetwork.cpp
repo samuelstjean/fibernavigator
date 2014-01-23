@@ -29,20 +29,6 @@
 #include "../gfx/TextureHandling.h"
 #include "../main.h"
 
-//#include <cuda.h>
-//#include <cuda_runtime.h>
-//#include <device_launch_parameters.h>
-
-//#define N (67445)
-//#define M (100)
-
-//__global__ void cuCorrelation(float *buf)
-//{
-//	int i = threadIdx.x + blockIdx.x * blockDim.x;
-//	if(i < N)
-//		buf[i] = buf[i]+0.2f;
-//}
-
 //////////////////////////////////////////
 //Constructor
 //////////////////////////////////////////
@@ -75,7 +61,6 @@ m_normalize( true )
 RestingStateNetwork::~RestingStateNetwork()
 {
     Logger::getInstance()->print( wxT( "RestingStateNetwork destructor called but nothing to do." ), LOGLEVEL_DEBUG );
-	//cudaFree(d_data);
 }
 
 //////////////////////////////////////////
@@ -94,7 +79,6 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_voxelSizeZ = pHeader->dz;
     
 	std::vector<short int> fileFloatData( m_datasetSize * m_bands, 0);
-	//cuData = new short int[m_datasetSize*m_bands];
 
 	if(pHeader->datatype == 4)
 	{
@@ -105,7 +89,6 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 			for( int j( 0 ); j < m_bands; ++j )
 			{
 				//if(!isnan(pData[j * datasetSize + i]))
-					//cuData[i * m_bands + j] = pData[j * m_datasetSize + i];
 					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
@@ -124,9 +107,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 		}
 		
 	}
-	//std::cout << "Before: " << cuData[2000];
-	//cudaMalloc(&d_data, m_datasetSize * m_bands * sizeof(short int));
-	//cudaMemcpy(d_data, cuData, m_datasetSize * m_bands * sizeof(short int), cudaMemcpyHostToDevice);
+
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );
 
@@ -350,24 +331,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
 			float R,G,B;
-			/*if(m_3Dpoints[s].second < 0.25f)
-			{
-				R = m_3Dpoints[s].second / 0.25f;
-				G = 0.0f;
-				B = 0.0f;
-			}
-			else if(m_3Dpoints[s].second < 0.75f && m_3Dpoints[s].second > 0.25f)
-			{
-				R = 1.0;
-				G = (m_3Dpoints[s].second - 0.25f) / 0.5f;
-				B = 0.0f;
-			}
-			else if(m_3Dpoints[s].second > 0.75f)
-			{
-				R = 1.0f;
-				G = 1.0f;
-				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
-			}*/
+
 			float mid = (m_zMin + m_zMax) / 2.0f;
 			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
 			if(m_3Dpoints[s].second < mid)
@@ -442,23 +406,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 //////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::correlate(std::vector<float>& positions)
 {
-	 //float data[N]; int count = 0;
-	//int N = m_rows * m_columns * m_bands;
-	//cuData = new float[m_rows][m_columns];
-	//for(int i =0; i<N;i++)
-	//	cuData[i] = i+0.1f;
 
-	//std::cout << "Before: " << cuData[1];
-	//cudaMalloc(&d_data, N * sizeof(float));
-	//cudaMemcpy(d_data, cuData, N * sizeof(float), cudaMemcpyHostToDevice);
-	//int block_size = 512;
-	//int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
-	//cuCorrelation<<<n_blocks,block_size>>>(d_data);
- //   cudaMemcpy(cuData, d_data, N * sizeof(float), cudaMemcpyDeviceToHost);
- //    
-	//std::cout <<"after " << cuData[1];
-
-	
 	//Mean signal inside box
 	std::vector<float> meanSignal;
 	for(int i=0; i < m_bands; i++)
