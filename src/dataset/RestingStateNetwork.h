@@ -87,7 +87,9 @@ private:
 	bool m_normalize; 
     Anatomy     *m_pClusterAnatomy;
     std::vector<float> *m_pClusters;
-    std::map<int, std::vector<float>> m_timeCourses;
+    std::map<int, std::vector<float> > m_timeCourseMAP;
+    std::vector<float> m_IDs;
+    std::map<int, std::pair< float, float > > m_meansAndSigmaMAP; 
 
 };
 

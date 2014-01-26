@@ -421,7 +421,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
 {
     wxArrayString fileName;
-    wxString caption          = wxT( "Choose a file containing timecourses" );
+    wxString caption          = wxT( "Choose a file containing fMRI timecourses" );
     wxString wildcard         = wxT( "*.*|*.*|AFNI 3dStatsDump (*.txt)|*.txt*" );
     wxString defaultDir       = wxEmptyString;
     wxString defaultFileName  = wxEmptyString;

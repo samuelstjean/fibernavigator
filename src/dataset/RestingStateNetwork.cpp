@@ -139,25 +139,31 @@ void RestingStateNetwork::loadTxt( wxArrayString fileName )
         getline(myFile, line);
         istringstream linestream(line);
         float ID;
-        vector<float> tempId;
 
         while (linestream >> ID)
         {   
-            tempId.push_back(ID);
+            m_IDs.push_back(ID);
             vector<float> V; 
-            m_timeCourses[ID] = V;
+            m_timeCourseMAP[ID] = V;
         }
 
         while(getline(myFile, line))
         {
             istringstream linestream(line);
             float value;
-            for(size_t i=0; i < tempId.size(); i++)
+            for(size_t i=0; i < m_IDs.size(); i++)
             {
                 linestream >> value;
-                m_timeCourses[tempId[i]].push_back(value);
+                m_timeCourseMAP[m_IDs[i]].push_back(value);
             }
         }
+    }
+
+    m_meansAndSigmas.resize(m_IDs.size());
+	//Transpose signal for easy acces of timelaps
+    for( size_t s(0); s < m_IDs.size(); ++s )
+    {
+		calculateMeanAndSigma(m_timeCourseMAP[m_IDs[s]], m_meansAndSigmaMAP[m_IDs[s]]);
     }
 
     myFile.close();
