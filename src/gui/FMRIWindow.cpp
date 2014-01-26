@@ -38,12 +38,17 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
+    m_pBtnSelectClusters = new wxButton( this, wxID_ANY,wxT("Clusters not selected"), wxDefaultPosition, wxSize(230, -1) );
+    Connect( m_pBtnSelectClusters->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnSelectClusters) );
+    m_pBtnSelectClusters->SetBackgroundColour(wxColour( 255, 147, 147 ));
+
 	m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start correlation"), wxDefaultPosition, wxSize(230, 50) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnStartRTFMRI) );
     m_pBtnStart->Enable(false);
 
 	wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxVERTICAL );
 	pBoxRow1->Add( m_pBtnSelectFMRI, 0, wxALIGN_CENTER | wxALL, 1 );
+    pBoxRow1->Add( m_pBtnSelectClusters, 0, wxALIGN_CENTER, 1 );
 	pBoxRow1->Add( m_pBtnStart, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
@@ -145,16 +150,36 @@ wxSizer* FMRIWindow::getWindowSizer()
     return m_pFMRISizer;
 }
 
+void FMRIWindow::OnSelectClusters( wxCommandEvent& WXUNUSED(event) )
+{
+	//Select map for threshold seeding
+    long item = m_pMainFrame->getCurrentListIndex();
+	Anatomy* pMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+
+	if( pMap != NULL && pMap->getBands() == 1 )
+    {
+		m_pBtnSelectClusters->SetLabel( pMap->getName() );
+        m_pBtnSelectClusters->SetBackgroundColour(wxNullColour);
+        m_pMainFrame->m_pRestingStateNetwork->setClusters( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+	}
+    //IF timecourses loaded also...
+    //if(m_pMainFrame->m_pMainGL->m_pRealTimeFibers->isHardiSelected())
+    //{
+    //    m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
+    //    m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
+    //}
+}
+
 void FMRIWindow::SetSelectButton()
 {
-	DatasetIndex indx = DatasetManager::getInstance()->m_pRestingStateNetwork->getIndex();
+	DatasetIndex indx = m_pMainFrame->m_pRestingStateNetwork->getIndex();
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
 	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 	
 	//m_pSliderRest->Enable();
 	//Set slider max value according to number of timelaps
-	m_pSliderRest->SetMax((int)DatasetManager::getInstance()->m_pRestingStateNetwork->getBands()-1);
+	m_pSliderRest->SetMax((int)m_pMainFrame->m_pRestingStateNetwork->getBands()-1);
 
 	m_pRadShowRawData->Enable();
 	m_pRadShowNetwork->Enable();
@@ -170,7 +195,7 @@ void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
 
 	int sliderValue = m_pSliderRest->GetValue();
     m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }
 
 void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
@@ -179,20 +204,20 @@ void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
 	m_pSliderRest->Disable();
 	m_pTextVolumeId->Disable();
 	m_pTxtRestBox->Disable();
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromNetwork();
+	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromNetwork();
 }
 void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
 {
 	int sliderValue = m_pSliderRest->GetValue();
     m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }
 
 void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
 {
 	float sliderValue = m_pSliderCorrThreshold->GetValue() / 100.0f;
     m_pTxtCorrThreshBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetCorrThreshold( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetCorrThreshold( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
@@ -200,7 +225,7 @@ void FMRIWindow::OnSliderColorMoved(  wxCommandEvent& WXUNUSED(event) )
 {
 	float sliderValue = m_pSliderColorMap->GetValue() / 10.0f;
 	m_pTxtColorMapBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetColorSliderValue( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetColorSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
@@ -208,7 +233,7 @@ void FMRIWindow::OnSliderSizePMoved(  wxCommandEvent& WXUNUSED(event) )
 {
 	float sliderValue = m_pSliderSizeP->GetValue();
 	m_pTxtSizePBox->SetValue( wxString::Format( wxT( "%.1f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetSizePSliderValue( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetSizePSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
@@ -217,18 +242,18 @@ void FMRIWindow::OnSliderAlphaMoved(  wxCommandEvent& WXUNUSED(event) )
 {
 	float sliderValue = m_pSliderAlpha->GetValue() / 100.0f;
 	m_pTxtAlphaBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetAlphaSliderValue( sliderValue );
+	m_pMainFrame->m_pRestingStateNetwork->SetAlphaSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
 void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert to anat
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( false );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( true );
+	m_pMainFrame->m_pRestingStateNetwork->SetNormalize( false );
+	m_pMainFrame->m_pRestingStateNetwork->seedBased();
+	m_pMainFrame->m_pRestingStateNetwork->SetNormalize( true );
 
-	std::vector<std::pair<Vector,float> >* data = DatasetManager::getInstance()->m_pRestingStateNetwork->getZscores();
+	std::vector<std::pair<Vector,float> >* data = m_pMainFrame->m_pRestingStateNetwork->getZscores();
 	int indx = DatasetManager::getInstance()->createAnatomy( data );
     
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
@@ -241,7 +266,7 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 
 	RTFMRIHelper::getInstance()->setRTFMRIReady(false);
 
-	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
+	m_pMainFrame->m_pRestingStateNetwork->clear3DPoints();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
@@ -255,7 +280,7 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
 
     if( !RTFMRIHelper::getInstance()->isRTFMRIReady() )
     {
-		DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
+		m_pMainFrame->m_pRestingStateNetwork->clear3DPoints();
         RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
         m_pBtnStart->SetLabel(wxT("Start correlation"));
     }

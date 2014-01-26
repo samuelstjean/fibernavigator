@@ -23,6 +23,7 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+#include <sstream>
 
 #include "../gfx/Image.h"
 #include "../gfx/BitmapHandling.h"
@@ -125,6 +126,41 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 
 	//Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
+}
+
+void RestingStateNetwork::loadTxt( wxArrayString fileName )
+{
+    wxString f = fileName[0];
+    ifstream myFile(f);
+
+    if (myFile.is_open())
+    {
+        string line;
+        getline(myFile, line);
+        istringstream linestream(line);
+        float ID;
+        vector<float> tempId;
+
+        while (linestream >> ID)
+        {   
+            tempId.push_back(ID);
+            vector<float> V; 
+            m_timeCourses[ID] = V;
+        }
+
+        while(getline(myFile, line))
+        {
+            istringstream linestream(line);
+            float value;
+            for(size_t i=0; i < tempId.size(); i++)
+            {
+                linestream >> value;
+                m_timeCourses[tempId[i]].push_back(value);
+            }
+        }
+    }
+
+    myFile.close();
 }
 
 

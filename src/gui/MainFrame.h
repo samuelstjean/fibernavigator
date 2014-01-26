@@ -78,6 +78,7 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     SelectionObject* getCurrentSelectionObject();
+    RestingStateNetwork     *m_pRestingStateNetwork;
 
 
 public:

@@ -343,7 +343,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadMaximas( filename, pHeader, pBody );
             }
         }
-		else if( m_forceLoadingAsRestingState )
+		/*else if( m_forceLoadingAsRestingState )
         {
             if ( m_anatomies.empty() )
             {
@@ -353,7 +353,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
             {
                 result = loadRestingState( filename, pHeader, pBody );
             }
-        }
+        }*/
         else
         {
             result = loadAnatomy( filename, pHeader, pBody );
@@ -591,40 +591,40 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a resting-state profile. Extension supported: .nii and .nii.gz
-DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
-{
-    Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
-	Anatomy *pAnatomy = new Anatomy( filename, RGB ); //OVERLAY
-	m_pRestingStateNetwork = new RestingStateNetwork();
-	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
-    if( m_pRestingStateNetwork->load( pHeader, pBody ) )
-    {
-        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
-        pAnatomy->setThreshold( THRESHOLD );
-        pAnatomy->setAlpha( ALPHA );
-        pAnatomy->setShow( SHOW );
-        pAnatomy->setShowFS( SHOW_FS );
-        pAnatomy->setUseTex( USE_TEX );
-		//wxString givenName = wxT("Network");
-		//pAnatomy->setName( givenName );
-		pAnatomy->setFloatDataset( m_pRestingStateNetwork->data );
-
-        DatasetIndex index = insert( pAnatomy );
-		m_pRestingStateNetwork->setNetworkInfo( index );
-
-        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-        
-        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
-        {
-            (*objsIt)->update();
-        }
-		
-        return index;
-    }
-	
-    delete pAnatomy;
-    return BAD_INDEX;
-}
+//DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
+//{
+//    Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
+//	Anatomy *pAnatomy = new Anatomy( filename, RGB ); //OVERLAY
+//	m_pRestingStateNetwork = new RestingStateNetwork();
+//	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
+//    if( m_pRestingStateNetwork->load( pHeader, pBody ) )
+//    {
+//        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+//        pAnatomy->setThreshold( THRESHOLD );
+//        pAnatomy->setAlpha( ALPHA );
+//        pAnatomy->setShow( SHOW );
+//        pAnatomy->setShowFS( SHOW_FS );
+//        pAnatomy->setUseTex( USE_TEX );
+//		//wxString givenName = wxT("Network");
+//		//pAnatomy->setName( givenName );
+//		pAnatomy->setFloatDataset( m_pRestingStateNetwork->data );
+//
+//        DatasetIndex index = insert( pAnatomy );
+//		m_pRestingStateNetwork->setNetworkInfo( index );
+//
+//        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+//        
+//        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
+//        {
+//            (*objsIt)->update();
+//        }
+//		
+//        return index;
+//    }
+//	
+//    delete pAnatomy;
+//    return BAD_INDEX;
+//}
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck

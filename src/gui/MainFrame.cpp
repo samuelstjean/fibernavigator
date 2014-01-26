@@ -420,9 +420,9 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
 
 void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
 {
-    wxArrayString fileNames;
-    wxString caption          = wxT( "Choose a resting-state file" );
-    wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
+    wxArrayString fileName;
+    wxString caption          = wxT( "Choose a file containing timecourses" );
+    wxString wildcard         = wxT( "*.*|*.*|AFNI 3dStatsDump (*.txt)|*.txt*" );
     wxString defaultDir       = wxEmptyString;
     wxString defaultFileName  = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxOPEN | wxFD_MULTIPLE );
@@ -431,10 +431,13 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
     if( dialog.ShowModal() == wxID_OK )
     {
         m_lastPath = dialog.GetDirectory();
-        dialog.GetPaths( fileNames );
+        dialog.GetPaths( fileName );
     }
     
-    unsigned int nbErrors = for_each( fileNames.begin(), fileNames.end(), Loader( this, m_pListCtrl, false, true ) ).getNbErrors();
+    m_pRestingStateNetwork = new RestingStateNetwork();
+    m_pRestingStateNetwork->loadTxt( fileName );
+
+    /*unsigned int nbErrors = for_each( fileNames.begin(), fileNames.end(), Loader( this, m_pListCtrl, false, true ) ).getNbErrors();
     if ( nbErrors )
     {
         wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
@@ -443,10 +446,10 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
         GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
         GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
         return;
-    }
+    }*/
     
-	m_pFMRIWindow->SetSelectButton();
-	m_pFMRIWindow->SetStartButton();
+	//m_pFMRIWindow->SetSelectButton();
+	//m_pFMRIWindow->SetStartButton();
     refreshAllGLWidgets();
 }
 

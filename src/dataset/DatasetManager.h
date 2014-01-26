@@ -44,7 +44,7 @@ public:
     std::vector<Maximas *>  getMaximas() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
     std::vector<Tensors *>  getTensors() const;
-	RestingStateNetwork     *m_pRestingStateNetwork;
+	//RestingStateNetwork     *m_pRestingStateNetwork;
 
     int                     getColumns() const;
     int                     getFrames() const;
@@ -127,7 +127,7 @@ private:
     DatasetIndex loadMaximas( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
 	// Loads Resting-state fMRI. Extension supported: .nii and .nii.gz
-    DatasetIndex loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    //DatasetIndex loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
     
 private:

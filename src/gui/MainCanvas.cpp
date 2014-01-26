@@ -801,11 +801,11 @@ void MainCanvas::render()
 				//Real-time fMRI correlation
 				if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
                 {	
-					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+					MyApp::frame->m_pRestingStateNetwork->seedBased();
                 }
 				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
 				{
-					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(false);
+					MyApp::frame->m_pRestingStateNetwork->render3D(false);
 				}
 
                 //save context for picking

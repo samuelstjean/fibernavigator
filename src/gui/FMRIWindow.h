@@ -44,6 +44,7 @@ public:
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	void onConvertRestingState				   ( wxCommandEvent& event );
+    void OnSelectClusters                      ( wxCommandEvent& event );
 	
 	
 	
@@ -71,6 +72,7 @@ private:
 	wxTextCtrl          *m_pTxtAlphaBox;
     wxStaticText        *m_pTextAlpha;
 	wxButton			*m_pBtnConvertFMRI;
+    wxButton            *m_pBtnSelectClusters;
 
 	bool showRawData;
     

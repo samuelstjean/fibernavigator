@@ -9,6 +9,7 @@
 #include "DatasetInfo.h"
 #include "DatasetIndex.h"
 #include "../misc/nifti/nifti1_io.h"
+#include <map>
 
 class RestingStateNetwork
 {
@@ -17,7 +18,6 @@ public:
     // Constructor/Destructor
     RestingStateNetwork();
     virtual ~RestingStateNetwork();
-
 	bool load( nifti_image *pHeader, nifti_image *pBody );
 	void setNetworkInfo( DatasetIndex index ) { m_index = index; }
 	void SetTextureFromSlider( int sliderValue );
@@ -31,6 +31,8 @@ public:
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
+    void setClusters( Anatomy* info )              { m_pClusterAnatomy = info; m_pClusters = m_pClusterAnatomy->getFloatDataset(); }
+    void loadTxt( wxArrayString fileName );
 
 	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -83,6 +85,9 @@ private:
 	float m_zL;
 	int m_datasetSizeL;
 	bool m_normalize; 
+    Anatomy     *m_pClusterAnatomy;
+    std::vector<float> *m_pClusters;
+    std::map<int, std::vector<float>> m_timeCourses;
 
 };
 
