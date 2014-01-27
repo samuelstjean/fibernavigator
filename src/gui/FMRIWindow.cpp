@@ -34,13 +34,14 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     SetSizer( m_pFMRISizer );
     SetAutoLayout( true );
 
-    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxDefaultPosition, wxSize(230, -1) );
+    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load time-courses"), wxDefaultPosition, wxSize(230, -1) );
 	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
     m_pBtnSelectClusters = new wxButton( this, wxID_ANY,wxT("Clusters not selected"), wxDefaultPosition, wxSize(230, -1) );
     Connect( m_pBtnSelectClusters->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnSelectClusters) );
     m_pBtnSelectClusters->SetBackgroundColour(wxColour( 255, 147, 147 ));
+	m_pBtnSelectClusters->Enable(false);
 
 	m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start correlation"), wxDefaultPosition, wxSize(230, 50) );
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnStartRTFMRI) );
@@ -162,28 +163,27 @@ void FMRIWindow::OnSelectClusters( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectClusters->SetBackgroundColour(wxNullColour);
         m_pMainFrame->m_pRestingStateNetwork->setClusters( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 	}
-    //IF timecourses loaded also...
-    //if(m_pMainFrame->m_pMainGL->m_pRealTimeFibers->isHardiSelected())
-    //{
-    //    m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
-    //    m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
-    //}
+	
+	m_pBtnStart->Enable( true ); 
+	m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
 }
 
 void FMRIWindow::SetSelectButton()
 {
-	DatasetIndex indx = m_pMainFrame->m_pRestingStateNetwork->getIndex();
-	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
-	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
+	//DatasetIndex indx = m_pMainFrame->m_pRestingStateNetwork->getIndex();
+	//Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+	m_pBtnSelectFMRI->SetLabel( wxT("Time-courses OK"));
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 	
 	//m_pSliderRest->Enable();
 	//Set slider max value according to number of timelaps
-	m_pSliderRest->SetMax((int)m_pMainFrame->m_pRestingStateNetwork->getBands()-1);
+	//m_pSliderRest->SetMax((int)m_pMainFrame->m_pRestingStateNetwork->getBands()-1);
 
-	m_pRadShowRawData->Enable();
+	//m_pRadShowRawData->Enable();
 	m_pRadShowNetwork->Enable();
 	m_pRadShowNetwork->SetValue(true);	
+
+	m_pBtnSelectClusters->Enable(true);
 }
 
 void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )

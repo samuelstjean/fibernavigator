@@ -35,7 +35,7 @@
 //////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
-m_zMax( 0.0f ),
+m_zMax(-999.0f ),
 m_alpha( 0.5f),
 m_pointSize( 10.0f ),
 m_isRealTimeOn( false ),
@@ -167,6 +167,38 @@ void RestingStateNetwork::loadTxt( wxArrayString fileName )
     }
 
     myFile.close();
+}
+
+void RestingStateNetwork::setClusters( Anatomy* info )
+{ 
+	m_pClusterAnatomy = info;
+	m_columns = m_pClusterAnatomy->getColumns();
+	m_rows = m_pClusterAnatomy->getRows();
+	m_frames = m_pClusterAnatomy->getFrames();
+
+	
+	
+	m_pClusters = m_pClusterAnatomy->getFloatDataset(); 
+
+	for(size_t c=0; c< m_pClusters->size(); c++)
+	{
+		m_pClusters->at(c) *=  m_pClusterAnatomy->getOldMax();
+	}
+
+
+	for(int x = 0; x < m_rows; x++)
+	{
+		for(int y = 0; y < m_columns; y++)
+		{
+			for(int z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				int IDcluster = m_pClusters->at(i);
+				if(IDcluster != 0)
+					m_voxels.insert(pair<int, Vector>(IDcluster,Vector(x,y,z)));
+			}
+		}
+	}
 }
 
 
@@ -312,49 +344,23 @@ void RestingStateNetwork::SetTextureFromNetwork()
 void RestingStateNetwork::seedBased()
 {
 	m_3Dpoints.clear();
+	m_zScores.clear();
 	m_zMin = 999.0f;
-	m_zMax = 0.0f;
-	 
-	std::vector<float> positions; 
+	m_zMax = -999.0f;
 
-    Vector minCorner, maxCorner, middle;
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
-		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
-		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+		int x = (int)(floor(selObjs[b]->getCenter().x));
+		int y = (int)(floor(selObjs[b]->getCenter().y));
+		int z = (int)(floor(selObjs[b]->getCenter().z));
 		
-		for( float x = minCorner.x; x <= maxCorner.x; x++)
-		{
-			for( float y = minCorner.y; y <= maxCorner.y; y++)
-			{
-				for( float z = minCorner.z; z <= maxCorner.z; z++)
-				{
-					//Switch to 3x3x3
-					int i = floor(float(z *m_frames/m_framesL))* m_columns * m_rows + floor(float(y *m_rows/m_rowsL))*m_columns + floor(float(x * m_columns/m_columnsL));
-					positions.push_back( i );
-				}
-			}
-		}
-		correlate(positions);
+		int i = z * m_columns * m_rows + y *m_columns + x;
+		int ID = m_pClusters->at(i);
+		if(ID !=0)
+			correlate(ID);
 	}
-	
-	//normalize min/max
-    for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
-    {
-		//if(m_normalize)
-			//m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
-
-		//Reset to 1x1x1
-		m_3Dpoints[s].first.x *= floor(float(m_columnsL/m_columns));
-		m_3Dpoints[s].first.y *= floor(float(m_rowsL/m_rows));
-		m_3Dpoints[s].first.z *= floor(float(m_framesL/m_frames));
-    }
 
 	render3D(true);
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
@@ -365,20 +371,18 @@ void RestingStateNetwork::seedBased()
 //////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::render3D(bool recalculateTexture)
 {
-	if( m_3Dpoints.size() > 0 )
+	if( m_zScores.size() > 0 )
     {
-		std::vector<float> texture(m_datasetSizeL*3, 0.0f);
-		
 		//Apply ColorMap
-		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
+		for(std::map<int,float>::iterator it = m_zScores.begin(); it != m_zScores.end(); it++)
 		{
 			float R,G,B;
 
 			float mid = (m_zMin + m_zMax) / 2.0f;
-			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
-			if(m_3Dpoints[s].second < mid)
+			float v = (it->second - m_zMin) / (m_zMax - m_zMin);
+			if(it->second < mid)
 			{
-				R = (m_3Dpoints[s].second - m_zMin) / (mid - m_zMin);
+				R = (it->second - m_zMin) / (mid - m_zMin);
 				G = 1.0f;
 				B = 0.0f;
 			}
@@ -392,170 +396,100 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(m_3Dpoints[s].second / m_zMax * m_pointSize + 1.0f);
-			glColor4f(R,G,B,m_3Dpoints[s].second / m_zMax *m_alpha);
+			glPointSize(it->second / m_zMax * m_pointSize + 1.0f);
+			glColor4f(R,G,B,it->second / m_zMax *m_alpha);
 
-			//glActiveTexture(GL_TEXTURE0);
-			//glEnable( GL_TEXTURE_2D );
-			//glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
+			//Illuminate voxels for each id.
 
-			glBegin(GL_POINTS);
-				glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
-			glEnd();
+			
+			std::pair <std::multimap<int, Vector>::iterator, std::multimap<int,Vector>::iterator> ret;
+			ret = m_voxels.equal_range(it->first);
+
+			for(std::multimap<int, Vector>::iterator itClust = ret.first; itClust != ret.second; itClust++)
+			{
+				glBegin(GL_POINTS);
+					glVertex3f(itClust->second.x, itClust->second.y, itClust->second.z);
+				glEnd();
+			}
 
 			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
-
-			//check for Unnecesssary computation when static scene
-			if(recalculateTexture)
-			{
-				std::vector<int> indexes;
-				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y  *m_columnsL + m_3Dpoints[s].first.x ; // O
-				texture[i*3] = R;
-				texture[i*3 + 1] = G;
-				texture[i*3 + 2] = B;
-
-				//Patch arround for 1x1x1
-				if(m_framesL != m_frames)
-				{
-					indexes = get3DIndexes(floor(float(m_3Dpoints[s].first.x * m_columns/m_columnsL)),floor(float(m_3Dpoints[s].first.y * m_rows/m_rowsL)),floor(float(m_3Dpoints[s].first.z * m_frames/m_framesL)));
-					for(unsigned int u = 0; u < indexes.size(); u++)
-					{
-						int id = indexes[u];
-						texture[id*3] = R;
-						texture[id*3 + 1] = G;
-						texture[id*3 + 2] = B;
-					}
-				}
-			}
-		}
-		//TEXTURE
-		if(recalculateTexture)
-		{
-			Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-			pNewAnatomy->setFloatDataset(texture);
-			pNewAnatomy->generateTexture();
 		}
 	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //Correlation function given a position, with all other time series
 //////////////////////////////////////////////////////////////////////////////////////////
-void RestingStateNetwork::correlate(std::vector<float>& positions)
+void RestingStateNetwork::correlate(int ID)
 {
 
-	//Mean signal inside box
-	std::vector<float> meanSignal;
-	for(int i=0; i < m_bands; i++)
-	{
-		float sum = 0;
-		for(unsigned int j=0; j < positions.size(); j++)
-		{	
-			int idx = positions[j];
-			sum += m_signalNormalized[idx][i];
-		}
-		sum /= positions.size();
-		meanSignal.push_back( sum );
-	}
+	//Signal DEPART
+	//std::vector<float> meanSignal = m_timeCourseMAP[ID];
 
-	//Get mean and sigma of it
-	std::pair<float, float> RefMeanAndSigma;
-	calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
-	std::vector<float> corrFactors;
-	corrFactors.assign(m_datasetSize, 0.0f);
+	//Mean et sigma de DEPART
+	//std::pair<float, float> RefMeanAndSigma = m_meansAndSigmaMAP[ID];
+
+	std::vector<pair<float,int> >corrFactors;
 	float corrSum = 0.0f;
 	int nb = 0;
+	int size;
 
 	//Correlate with rest of the brain, i.e find corr factors
-	for( float x = 0; x < m_columns; x++)
+	for(map<int,vector<float> >::iterator it = m_timeCourseMAP.begin() ; it != m_timeCourseMAP.end(); it++)
 	{
-		for( float y = 0; y < m_rows; y++)
-		{
-			for( float z = 0; z < m_frames; z++)
-			{
-				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(m_meansAndSigmas[i].first != 0)
-				{
-					float num = 0.0f;
-					float denum = 0.0f;
+		float num = 0.0f;
+		float denum = 0.0f;
+		size = it->second.size();
+		//int corri = 0;
 					
-					for(int j = 0; j < m_bands; j++)
-					{
-						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
-					}
-					float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-					value /= (m_bands);
-				
-					if(value > 0)
-					{
-						corrSum+=value;
-						corrFactors[i] = value;
-						nb++;
-					}
-					else
-						corrFactors[i] = -1;
-				}
-				else
-					corrFactors[i] = 0.0f;
-			}
+		for(int t = 0; t < size; t++)
+		{
+			num += (m_timeCourseMAP[ID][t] - m_meansAndSigmaMAP[ID].first) * ( it->second[t] - m_meansAndSigmaMAP[it->first].first);
 		}
+		float value = num / ( m_meansAndSigmaMAP[ID].second * m_meansAndSigmaMAP[it->first].second);
+		value /= (size);
+		corrSum+=value;
+				
+		//if(value > 0)
+		//{
+		//	
+		//	corrFactors[i] = value;
+		//	nb++;
+		//}
+		//else
+		//	corrFactors[i] = -1;
+		corrFactors.push_back(make_pair<float, int>(value, it->first));
 	}
 
+
 	//Find mean and sigma of all corr factors.
-	float meanCorr = corrSum / nb;
+	float meanCorr = corrSum / size;
 	float sigma = 0.0f;
-	for( float x = 0; x < m_columns; x++)
+	
+	for(int c=0; c<corrFactors.size(); c++)
 	{
-		for( float y = 0; y < m_rows; y++)
-		{
-			for( float z = 0; z < m_frames; z++)
-			{
-				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(corrFactors[i] > 0.0f)
-				{
-					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
-				}		
-			}
-		}
+		sigma += (corrFactors[c].first - meanCorr)*(corrFactors[c].first - meanCorr);	
 	}
 
 	//Calculate z-scores, and save them.
-	sigma /= nb;
+	sigma /= size;
 	sigma = sqrt(sigma);
-	for( float x = 0; x < m_columns; x++)
-	{
-		for( float y = 0; y < m_rows; y++)
-		{
-			for( float z = 0; z < m_frames; z++)
-			{
-				int i = z * m_columns * m_rows + y *m_columns + x;
-				
-				if(m_corrThreshold == 0.0f && corrFactors[i] != 0)
-					{	
-						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),0.0f));
-					}
 
-				if(corrFactors[i] > 0)
-				{
-					float zScore = (corrFactors[i] - meanCorr) / sigma;
-					if(zScore < m_zMin && zScore > 0.0f)
-						m_zMin = zScore;
-					if(zScore > m_zMax)
-						m_zMax = zScore;
-					if(zScore > m_corrThreshold)
-					{
-						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
-					}
-				
-				}
-			}
+	for(int cc=0; cc<corrFactors.size(); cc++)
+	{
+		float zScore = (corrFactors[cc].first - meanCorr) / sigma;
+		if(zScore < m_zMin && zScore > 0.0f)
+			m_zMin = zScore;
+		if(zScore > m_zMax)
+			m_zMax = zScore;
+		if(zScore > m_corrThreshold)
+		{
+			//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+			m_zScores[corrFactors[cc].second] = zScore;
 		}
-	}
+	}			
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

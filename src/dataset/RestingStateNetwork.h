@@ -31,7 +31,7 @@ public:
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
-    void setClusters( Anatomy* info )              { m_pClusterAnatomy = info; m_pClusters = m_pClusterAnatomy->getFloatDataset(); }
+    void setClusters( Anatomy* info );            
     void loadTxt( wxArrayString fileName );
 
 	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
@@ -45,7 +45,7 @@ public:
 
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
-	void correlate(std::vector< float >& position);
+	void correlate(int ID);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	std::vector<int> get3DIndexes(int x, int y, int z);
 	
@@ -85,11 +85,14 @@ private:
 	float m_zL;
 	int m_datasetSizeL;
 	bool m_normalize; 
-    Anatomy     *m_pClusterAnatomy;
-    std::vector<float> *m_pClusters;
-    std::map<int, std::vector<float> > m_timeCourseMAP;
-    std::vector<float> m_IDs;
-    std::map<int, std::pair< float, float > > m_meansAndSigmaMAP; 
+
+    Anatomy     *m_pClusterAnatomy; //Clusters anatomy
+    std::vector<float> *m_pClusters; //Vector where each position is associated to a cluster
+    std::map<int, std::vector<float> > m_timeCourseMAP; //Mapping a cluster ID to a timecourse vector
+    std::vector<float> m_IDs; //List of clusters ID
+    std::map<int, std::pair< float, float > > m_meansAndSigmaMAP; //Mapping a cluster ID to a pair mean/sigma of its timecourse.
+	std::multimap<int, Vector> m_voxels; //multimap, mapping a cluster ID to all the pixels it contains (voxels to illuminate following the correlation step)
+	std::map<int,float> m_zScores; //Map of cluster ID to zScores, telling us which cluster to illuminate.
 
 };
 

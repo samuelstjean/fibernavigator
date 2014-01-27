@@ -435,20 +435,10 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
     }
     
     m_pRestingStateNetwork = new RestingStateNetwork();
+	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
     m_pRestingStateNetwork->loadTxt( fileName );
-
-    /*unsigned int nbErrors = for_each( fileNames.begin(), fileNames.end(), Loader( this, m_pListCtrl, false, true ) ).getNbErrors();
-    if ( nbErrors )
-    {
-        wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
-        
-        wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
-        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
-        GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
-        return;
-    }*/
     
-	//m_pFMRIWindow->SetSelectButton();
+	m_pFMRIWindow->SetSelectButton();
 	//m_pFMRIWindow->SetStartButton();
     refreshAllGLWidgets();
 }
