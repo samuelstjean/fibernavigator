@@ -35,7 +35,7 @@
 //////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
-m_zMax(-999.0f ),
+m_zMax( 0.0f ),
 m_alpha( 0.5f),
 m_pointSize( 10.0f ),
 m_isRealTimeOn( false ),
@@ -186,9 +186,9 @@ void RestingStateNetwork::setClusters( Anatomy* info )
 	}
 
 
-	for(int x = 0; x < m_rows; x++)
+	for(int x = 0; x < m_columns; x++)
 	{
-		for(int y = 0; y < m_columns; y++)
+		for(int y = 0; y < m_rows; y++)
 		{
 			for(int z = 0; z < m_frames; z++)
 			{
@@ -346,19 +346,19 @@ void RestingStateNetwork::seedBased()
 	m_3Dpoints.clear();
 	m_zScores.clear();
 	m_zMin = 999.0f;
-	m_zMax = -999.0f;
+	m_zMax = 0.0f;
 
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
-		int x = (int)(floor(selObjs[b]->getCenter().x));
-		int y = (int)(floor(selObjs[b]->getCenter().y));
-		int z = (int)(floor(selObjs[b]->getCenter().z));
+		int x = floor(selObjs[b]->getCenter().x);
+		int y = floor(selObjs[b]->getCenter().y);
+		int z = floor(selObjs[b]->getCenter().z);
 		
 		int i = z * m_columns * m_rows + y *m_columns + x;
 		int ID = m_pClusters->at(i);
-		if(ID !=0)
+		if(ID != 0)
 			correlate(ID);
 	}
 
@@ -396,12 +396,11 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(it->second / m_zMax * m_pointSize + 1.0f);
-			glColor4f(R,G,B,it->second / m_zMax *m_alpha);
+			glPointSize(it->second / (m_zMax *1.5f) * m_pointSize + 1.0f);
+			glColor4f(R,G,B,it->second / (1.5f*m_zMax) *m_alpha);
 
 			//Illuminate voxels for each id.
 
-			
 			std::pair <std::multimap<int, Vector>::iterator, std::multimap<int,Vector>::iterator> ret;
 			ret = m_voxels.equal_range(it->first);
 
@@ -449,23 +448,20 @@ void RestingStateNetwork::correlate(int ID)
 			num += (m_timeCourseMAP[ID][t] - m_meansAndSigmaMAP[ID].first) * ( it->second[t] - m_meansAndSigmaMAP[it->first].first);
 		}
 		float value = num / ( m_meansAndSigmaMAP[ID].second * m_meansAndSigmaMAP[it->first].second);
-		value /= (size);
-		corrSum+=value;
-				
-		//if(value > 0)
-		//{
-		//	
-		//	corrFactors[i] = value;
-		//	nb++;
-		//}
-		//else
-		//	corrFactors[i] = -1;
-		corrFactors.push_back(make_pair<float, int>(value, it->first));
+		value /= size;
+
+		if(value > 0)
+		{
+			corrSum+=value;
+			corrFactors.push_back(make_pair<float, int>(value, it->first));
+			nb++;
+		}
+
 	}
 
 
 	//Find mean and sigma of all corr factors.
-	float meanCorr = corrSum / size;
+	float meanCorr = corrSum / nb;
 	float sigma = 0.0f;
 	
 	for(int c=0; c<corrFactors.size(); c++)
@@ -474,20 +470,23 @@ void RestingStateNetwork::correlate(int ID)
 	}
 
 	//Calculate z-scores, and save them.
-	sigma /= size;
+	sigma /= nb;
 	sigma = sqrt(sigma);
 
 	for(int cc=0; cc<corrFactors.size(); cc++)
 	{
-		float zScore = (corrFactors[cc].first - meanCorr) / sigma;
-		if(zScore < m_zMin && zScore > 0.0f)
-			m_zMin = zScore;
-		if(zScore > m_zMax)
-			m_zMax = zScore;
-		if(zScore > m_corrThreshold)
+		if(corrFactors[cc].first > 0)
 		{
-			//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
-			m_zScores[corrFactors[cc].second] = zScore;
+			float zScore = 1.5f*(corrFactors[cc].first - meanCorr) / sigma;
+			if(zScore < m_zMin && zScore > 0.0f)
+				m_zMin = zScore;
+			if(zScore > m_zMax)
+				m_zMax = zScore;
+			if(zScore > m_corrThreshold)
+			{
+				//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+				m_zScores[corrFactors[cc].second] = zScore;
+			}
 		}
 	}			
 }
