@@ -103,8 +103,7 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
     createOffset( pAnatomy );
 }
 
-Anatomy::Anatomy( std::vector< float >* pDataset, 
-                  const int sample ) 
+Anatomy::Anatomy( std::vector< float >* pDataset, DatasetType type ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),
   m_pRoi( NULL ),
@@ -122,7 +121,7 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
     m_frames  = DatasetManager::getInstance()->getFrames();
     m_bands   = 1;
 
-    m_type    = HEAD_BYTE;
+    m_type    = type;
 
     m_isLoaded = true;
 

@@ -53,32 +53,6 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow1->Add( m_pBtnStart, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-	m_pTextDisplayMode = new wxStaticText( this, wxID_ANY, wxT( "Display:" ), wxDefaultPosition, wxSize(200, -1) );
-    m_pRadShowRawData = new wxRadioButton( this,  wxID_ANY, wxT( "Raw Data" ), wxDefaultPosition, wxSize(160, -1) );
-	m_pRadShowRawData->Disable();
-	m_pRadShowNetwork = new wxRadioButton( this,  wxID_ANY, wxT( "Network" ), wxDefaultPosition, wxSize(160, -1) );
-	m_pRadShowNetwork->Disable();
-	Connect( m_pRadShowRawData->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( FMRIWindow::onSwitchViewRaw ) );
-	Connect( m_pRadShowNetwork->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( FMRIWindow::onSwitchViewNet ) );
-
-	wxBoxSizer *pBoxRow2 = new wxBoxSizer( wxVERTICAL );
-	pBoxRow2->Add( m_pTextDisplayMode, 0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRow2->Add( m_pRadShowRawData, 0, wxALIGN_CENTER, 1 );
-	pBoxRow2->Add( m_pRadShowNetwork, 0, wxALIGN_CENTER, 1 );
-	m_pFMRISizer->Add( pBoxRow2, 0, wxFIXED_MINSIZE | wxALL, 2 );
-
-	m_pTextVolumeId = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderRest->Disable();
-	Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
-    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-	wxBoxSizer *pBoxRow3 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow3->Add( m_pTextVolumeId, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow3->Add( m_pSliderRest,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow3->Add( m_pTxtRestBox,   0, wxALIGN_LEFT | wxALL, 1);
-	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
-
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 500, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderCorrThreshold->SetValue( 300 );
@@ -90,18 +64,6 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     pBoxRow5->Add( m_pSliderCorrThreshold,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
 	pBoxRow5->Add( m_pTxtCorrThreshBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow5, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
-
-	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderColorMap->SetValue( 50 );
-	Connect( m_pSliderColorMap->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderColorMoved) );
-    m_pTxtColorMapBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-	wxBoxSizer *pBoxRow6 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow6->Add( m_pTextColorMap, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow6->Add( m_pSliderColorMap,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow6->Add( m_pTxtColorMapBox,   0, wxALIGN_LEFT | wxALL, 1);
-	m_pFMRISizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -170,47 +132,10 @@ void FMRIWindow::OnSelectClusters( wxCommandEvent& WXUNUSED(event) )
 
 void FMRIWindow::SetSelectButton()
 {
-	//DatasetIndex indx = m_pMainFrame->m_pRestingStateNetwork->getIndex();
-	//Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
 	m_pBtnSelectFMRI->SetLabel( wxT("Time-courses OK"));
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
-	
-	//m_pSliderRest->Enable();
-	//Set slider max value according to number of timelaps
-	//m_pSliderRest->SetMax((int)m_pMainFrame->m_pRestingStateNetwork->getBands()-1);
-
-	//m_pRadShowRawData->Enable();
-	m_pRadShowNetwork->Enable();
-	m_pRadShowNetwork->SetValue(true);	
 
 	m_pBtnSelectClusters->Enable(true);
-}
-
-void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
-{
-	showRawData = true;
-	m_pSliderRest->Enable();
-	m_pTextVolumeId->Enable();
-	m_pTxtRestBox->Enable();
-
-	int sliderValue = m_pSliderRest->GetValue();
-    m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
-	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
-}
-
-void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
-{
-	showRawData = false;
-	m_pSliderRest->Disable();
-	m_pTextVolumeId->Disable();
-	m_pTxtRestBox->Disable();
-	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromNetwork();
-}
-void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
-{
-	int sliderValue = m_pSliderRest->GetValue();
-    m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
-	m_pMainFrame->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }
 
 void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
@@ -218,14 +143,6 @@ void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
 	float sliderValue = m_pSliderCorrThreshold->GetValue() / 100.0f;
     m_pTxtCorrThreshBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
 	m_pMainFrame->m_pRestingStateNetwork->SetCorrThreshold( sliderValue );
-	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
-}
-
-void FMRIWindow::OnSliderColorMoved(  wxCommandEvent& WXUNUSED(event) )
-{
-	float sliderValue = m_pSliderColorMap->GetValue() / 10.0f;
-	m_pTxtColorMapBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	m_pMainFrame->m_pRestingStateNetwork->SetColorSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
@@ -249,12 +166,12 @@ void FMRIWindow::OnSliderAlphaMoved(  wxCommandEvent& WXUNUSED(event) )
 void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert to anat
-	m_pMainFrame->m_pRestingStateNetwork->SetNormalize( false );
+	m_pMainFrame->m_pRestingStateNetwork->SetExport( true );
 	m_pMainFrame->m_pRestingStateNetwork->seedBased();
-	m_pMainFrame->m_pRestingStateNetwork->SetNormalize( true );
+	m_pMainFrame->m_pRestingStateNetwork->SetExport( false );
 
-	std::vector<std::pair<Vector,float> >* data = m_pMainFrame->m_pRestingStateNetwork->getZscores();
-	int indx = DatasetManager::getInstance()->createAnatomy( data );
+	
+	int indx = DatasetManager::getInstance()->createAnatomy( m_pMainFrame->m_pRestingStateNetwork->getZscores(), OVERLAY );
     
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setShowFS(false);

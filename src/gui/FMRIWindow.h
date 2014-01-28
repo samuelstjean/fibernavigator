@@ -35,12 +35,9 @@ public:
 	void SetStartButton(){ m_pBtnStart->Enable( true ); m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));}
 
 public:
-	void onSwitchViewRaw					   ( wxCommandEvent& event );
-	void onSwitchViewNet					   ( wxCommandEvent& event );
-	void OnSliderRestMoved                     ( wxCommandEvent& event );
+
 	void OnStartRTFMRI					       ( wxCommandEvent& event );
 	void OnSliderCorrThreshMoved			   ( wxCommandEvent& event );
-	void OnSliderColorMoved					   ( wxCommandEvent& event );
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	void onConvertRestingState				   ( wxCommandEvent& event );
@@ -51,20 +48,10 @@ public:
 private:
     MainFrame           *m_pMainFrame;
 	wxButton            *m_pBtnSelectFMRI;
-	wxRadioButton		*m_pRadShowRawData;
-	wxRadioButton		*m_pRadShowNetwork;
-	wxSlider            *m_pSliderRest;
-	wxTextCtrl          *m_pTxtRestBox;
-    wxStaticText        *m_pTextVolumeId;
-	wxStaticText        *m_pTextDisplayMode;
-	wxBoxSizer          *m_pBoxDisplayRadios;
 	wxToggleButton      *m_pBtnStart;
 	wxSlider            *m_pSliderCorrThreshold;
 	wxTextCtrl          *m_pTxtCorrThreshBox;
     wxStaticText        *m_pTextCorrThreshold;
-	wxSlider            *m_pSliderColorMap;
-	wxTextCtrl          *m_pTxtColorMapBox;
-    wxStaticText        *m_pTextColorMap;
 	wxSlider            *m_pSliderSizeP;
 	wxTextCtrl          *m_pTxtSizePBox;
     wxStaticText        *m_pTextSizeP;
