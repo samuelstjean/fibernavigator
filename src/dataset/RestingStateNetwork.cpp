@@ -166,20 +166,31 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 		for(std::map<int,float>::iterator it = m_zScores.begin(); it != m_zScores.end(); it++)
 		{
 			float R,G,B;
+			bool render = true;
 
+			float quart = 1.0f*(m_zMin + m_zMax) / 4.0f;
 			float mid = (m_zMin + m_zMax) / 2.0f;
+			float trois_quart = 3.0f* (m_zMin + m_zMax) / 4.0f;
 			float v = (it->second - m_zMin) / (m_zMax - m_zMin);
-			if(it->second < mid)
+
+			if( it->second < quart )
 			{
-				R = (it->second - m_zMin) / (mid - m_zMin);
-				G = 1.0f;
+                R = (it->second - m_zMin) / (quart - m_zMin);
+                G = 0.0f;
+                B = 0.0f;
+                render = false;
+			}
+			else if(it->second >= quart && it->second < trois_quart)
+			{
+				R = 1.0f;
+				G = (it->second - quart) / (trois_quart - quart);
 				B = 0.0f;
 			}
 			else
 			{
 				R = 1.0f;
-				G = 1 - (v);
-				B = 0.0f;
+				G = 1.0f;
+				B = v;
 			}
 
 			glEnable(GL_BLEND);
@@ -189,27 +200,29 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glColor4f(R,G,B,it->second / (1.5f*m_zMax) *m_alpha);
 
 			//Illuminate voxels for each id.
-
-			std::pair <std::multimap<int, Vector>::iterator, std::multimap<int,Vector>::iterator> ret;
-			ret = m_voxels.equal_range(it->first);
-
-			for(std::multimap<int, Vector>::iterator itClust = ret.first; itClust != ret.second; itClust++)
+			if(render)
 			{
-				int pX = itClust->second.x;
-				int pY = itClust->second.y;
-				int pZ = itClust->second.z;
+				std::pair <std::multimap<int, Vector>::iterator, std::multimap<int,Vector>::iterator> ret;
+				ret = m_voxels.equal_range(it->first);
 
-				glBegin(GL_POINTS);
-					glVertex3f(pX,pY,pZ);
-				glEnd();
-
-				if(m_export)
+				for(std::multimap<int, Vector>::iterator itClust = ret.first; itClust != ret.second; itClust++)
 				{
-					int i = pZ * m_columns * m_rows + pY *m_columns + pX;
-					m_Ztext[i] = it->second;
-				}
-			}
+					int pX = itClust->second.x;
+					int pY = itClust->second.y;
+					int pZ = itClust->second.z;
 
+					glBegin(GL_POINTS);
+						glVertex3f(pX,pY,pZ);
+					glEnd();
+
+					if(m_export)
+					{
+						int i = pZ * m_columns * m_rows + pY *m_columns + pX;
+						m_Ztext[i] = it->second;
+					}
+				}
+				render = true;
+			}
 			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
@@ -268,7 +281,7 @@ void RestingStateNetwork::correlate(int ID)
 	{
 		if(corrFactors[cc].first > 0)
 		{
-			float zScore = 1.5f*(corrFactors[cc].first - meanCorr) / sigma;
+			float zScore = (corrFactors[cc].first - meanCorr) / sigma;
 			if(zScore < m_zMin && zScore > 0.0f)
 				m_zMin = zScore;
 			if(zScore > m_zMax)
