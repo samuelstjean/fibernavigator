@@ -139,7 +139,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
     wxBoxSizer *pBoxRowPath = new wxBoxSizer( wxVERTICAL );
     pBoxRowPath->Add( m_pBtnSelectTumor, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRowPath->Add( m_pBtnSelectBrain,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+    pBoxRowPath->Add( m_pBtnSelectBrain,   0, wxALIGN_LEFT | wxALL, 1);
     pBoxRowPath->Add( m_pBtnPathPlan,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRowPath, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 

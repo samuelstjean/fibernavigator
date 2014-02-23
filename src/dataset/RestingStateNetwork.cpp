@@ -657,6 +657,7 @@ void RestingStateNetwork::renderPath()
     float yB = positionsBrain[idBrain].y;
     float zB = positionsBrain[idBrain].z;
 
+    //Main line
     glColor3f(0.0f, 1.0f, 0.0f);
     glLineWidth(2);
     glBegin( GL_LINES );
@@ -672,8 +673,9 @@ void RestingStateNetwork::renderPath()
     Vector plus = Vector(xB, yB, zB) + 5.0f*end;
     Vector moins = Vector(xB, yB, zB) - 5.0f*end;
 
+    //X on brain
     glColor3f(0.8f, 1.0f, 0.8f);
-    glLineWidth(4);
+    glLineWidth(3);
     glBegin( GL_LINES );
         glVertex3f( plus.x, plus.y, plus.z );
         glVertex3f( moins.x, moins.y, moins.z );
