@@ -660,22 +660,24 @@ void RestingStateNetwork::renderPath()
     //Main line
     glColor3f(0.0f, 1.0f, 0.0f);
     glLineWidth(2);
+    glLineStipple(1, 0x00FF);  
+    glEnable(GL_LINE_STIPPLE);
     glBegin( GL_LINES );
         glVertex3f( xT, yT, zT );
         glVertex3f( xB, yB, zB );
     glEnd();
+    glDisable(GL_LINE_STIPPLE);
 
     Vector path(xB - xT, yB - yT, zB - zT);
     Vector end(xB - xT, yB - yT, zB - zT);
     end.rotateX(90);
     end.normalize();
 
-    Vector plus = Vector(xB, yB, zB) + 5.0f*end;
-    Vector moins = Vector(xB, yB, zB) - 5.0f*end;
+    Vector plus = Vector(xB, yB, zB) + 2.0f*end;
+    Vector moins = Vector(xB, yB, zB) - 2.0f*end;
 
     //X on brain
-    glColor3f(0.8f, 1.0f, 0.8f);
-    glLineWidth(3);
+    glColor3f(1.0f, 0.0f, 0.0f);
     glBegin( GL_LINES );
         glVertex3f( plus.x, plus.y, plus.z );
         glVertex3f( moins.x, moins.y, moins.z );
