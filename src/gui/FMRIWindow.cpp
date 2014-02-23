@@ -128,6 +128,21 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow9->Add( m_pBtnConvertFMRI,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow9, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
+    m_pBtnSelectTumor = new wxButton( this, wxID_ANY,wxT("Tumor not selected"), wxDefaultPosition, wxSize(230, -1) );
+    Connect( m_pBtnSelectTumor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnSelectTumor) );
+
+    m_pBtnSelectBrain = new wxButton( this, wxID_ANY,wxT("Brain not selected"), wxDefaultPosition, wxSize(230, -1) );
+    Connect( m_pBtnSelectBrain->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnSelectBrain) );
+
+    m_pBtnPathPlan = new wxButton( this, wxID_ANY,wxT("PATH PLAN"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnPathPlan->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnPathPlan) );
+
+    wxBoxSizer *pBoxRowPath = new wxBoxSizer( wxVERTICAL );
+    pBoxRowPath->Add( m_pBtnSelectTumor, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRowPath->Add( m_pBtnSelectBrain,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+    pBoxRowPath->Add( m_pBtnPathPlan,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pFMRISizer->Add( pBoxRowPath, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -264,4 +279,36 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnStart->SetLabel(wxT("Stop correlation"));
 	}
 }
+
+void FMRIWindow::OnSelectTumor( wxCommandEvent& WXUNUSED(event) )
+{
+    //Select surface for seeding
+    long item = m_pMainFrame->getCurrentListIndex();
+	DatasetInfo* pTumor = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+
+	if( pTumor != NULL && pTumor->getType() == ISO_SURFACE )
+    {
+		m_pBtnSelectTumor->SetLabel( pTumor->getName() );
+		DatasetManager::getInstance()->m_pRestingStateNetwork->setTumorInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+    }
+}
+
+void FMRIWindow::OnSelectBrain( wxCommandEvent& WXUNUSED(event) )
+{
+        //Select surface for seeding
+    long item = m_pMainFrame->getCurrentListIndex();
+	DatasetInfo* pBrain = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+
+	if( pBrain != NULL && pBrain->getType() == ISO_SURFACE )
+    {
+		m_pBtnSelectBrain->SetLabel( pBrain->getName() );
+		DatasetManager::getInstance()->m_pRestingStateNetwork->setBrainInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+    }
+}
+
+void FMRIWindow::OnPathPlan( wxCommandEvent& WXUNUSED(event) )
+{
+    DatasetManager::getInstance()->m_pRestingStateNetwork->pathPlan();
+}
+
 

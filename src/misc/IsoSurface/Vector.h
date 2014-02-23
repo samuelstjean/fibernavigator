@@ -189,6 +189,9 @@ public:
     */
     Vector interpolate3(const Vector& leftControl, const Vector& rightControl, const Vector& endControl, const double t) const;
 
+    //Compute the distance between 2 3Dpoints (without the sqrt)
+    double distance(const Vector& rhs) const;
+
 };
 
 #endif // !defined(AFX_VECTOR_H__0AFDDCFD_6A7A_4943_8068_CBA5CEC834C5__INCLUDED_)

@@ -403,3 +403,8 @@ Vector Vector::interpolate3(const Vector& leftControl, const Vector& rightContro
     Vector end = rightControl.interpolate1(endControl, t);
     return begin.interpolate2(mid, end, t);
 }
+
+double Vector::distance(const Vector& rhs) const
+{
+    return ((x - rhs.x)*(x - rhs.x) + (y - rhs.y)*(y - rhs.y) + (z - rhs.z)*(z - rhs.z));
+}

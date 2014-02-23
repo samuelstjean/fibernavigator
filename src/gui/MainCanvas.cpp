@@ -807,6 +807,11 @@ void MainCanvas::render()
 				{
 					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(false);
 				}
+                //PathPlan
+                if(RTFMRIHelper::getInstance()->isPathPlanOk())
+                {
+                    DatasetManager::getInstance()->m_pRestingStateNetwork->renderPath();
+                }
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );

@@ -44,7 +44,9 @@ public:
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	void onConvertRestingState				   ( wxCommandEvent& event );
-	
+	void OnSelectTumor                         ( wxCommandEvent& event );
+    void OnSelectBrain                         ( wxCommandEvent& event );
+    void OnPathPlan                            ( wxCommandEvent& event );
 	
 	
 private:
@@ -71,6 +73,9 @@ private:
 	wxTextCtrl          *m_pTxtAlphaBox;
     wxStaticText        *m_pTextAlpha;
 	wxButton			*m_pBtnConvertFMRI;
+    wxButton			*m_pBtnSelectTumor;
+    wxButton			*m_pBtnSelectBrain;
+    wxButton            *m_pBtnPathPlan;
 
 	bool showRawData;
     

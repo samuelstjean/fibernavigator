@@ -14,6 +14,8 @@
 #include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
+#include "../misc/IsoSurface/CIsoSurface.h"
+#include "../misc/IsoSurface/TriangleMesh.h"
 
 #include <GL/glew.h>
 #include <wx/math.h>
@@ -607,4 +609,74 @@ void RestingStateNetwork::calculateMeanAndSigma(std::vector<float> signal, std::
 
 	params.first = mean;
 	params.second = sqrt(sigma);
+}
+
+void RestingStateNetwork::setTumorInfo( DatasetInfo* info )
+{ 
+    m_pTumorInfo = info; 
+    CIsoSurface* pSurfTumor = (CIsoSurface*) m_pTumorInfo;
+	positionsTumor = pSurfTumor->m_tMesh->getVerts();
+}
+    
+void RestingStateNetwork::setBrainInfo( DatasetInfo* info )
+{ 
+    m_pBrainInfo = info; 
+    CIsoSurface* pSurfBrain = (CIsoSurface*) m_pBrainInfo;
+	positionsBrain = pSurfBrain->m_tMesh->getVerts();
+}
+
+void RestingStateNetwork::pathPlan()
+{
+    float distMin = numeric_limits<float>::infinity();
+
+    for ( size_t i = 0; i < positionsTumor.size(); ++i )
+    {
+        for ( size_t j = 0; j < positionsBrain.size(); ++j )
+        {
+            double dist = positionsTumor[i].distance(positionsBrain[j]);
+
+            if(dist < distMin)
+            {
+                distMin = dist;
+                idTumor = i;
+                idBrain = j;
+            }
+        }
+    }
+
+    RTFMRIHelper::getInstance()->setPathPlanOk(true);
+}
+
+void RestingStateNetwork::renderPath()
+{
+    float xT = positionsTumor[idTumor].x;
+    float yT = positionsTumor[idTumor].y;
+    float zT = positionsTumor[idTumor].z;
+
+    float xB = positionsBrain[idBrain].x;
+    float yB = positionsBrain[idBrain].y;
+    float zB = positionsBrain[idBrain].z;
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glLineWidth(2);
+    glBegin( GL_LINES );
+        glVertex3f( xT, yT, zT );
+        glVertex3f( xB, yB, zB );
+    glEnd();
+
+    Vector path(xB - xT, yB - yT, zB - zT);
+    Vector end(xB - xT, yB - yT, zB - zT);
+    end.rotateX(90);
+    end.normalize();
+
+    Vector plus = Vector(xB, yB, zB) + 5.0f*end;
+    Vector moins = Vector(xB, yB, zB) - 5.0f*end;
+
+    glColor3f(0.8f, 1.0f, 0.8f);
+    glLineWidth(4);
+    glBegin( GL_LINES );
+        glVertex3f( plus.x, plus.y, plus.z );
+        glVertex3f( moins.x, moins.y, moins.z );
+    glEnd();
+
 }

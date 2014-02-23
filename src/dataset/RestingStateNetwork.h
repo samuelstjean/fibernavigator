@@ -38,7 +38,12 @@ public:
 	DatasetIndex getRows()    { return m_rows; }
 	DatasetIndex getFrames()  { return m_frames; }
 	DatasetIndex getBands()   { return m_bands; }
-	
+
+    void setTumorInfo( DatasetInfo* info );
+    void setBrainInfo( DatasetInfo* info );
+	void pathPlan();
+    void renderPath();
+
 	std::vector<float> data; //Used for texture mapping
 
 private:
@@ -83,6 +88,12 @@ private:
 	float m_zL;
 	int m_datasetSizeL;
 	bool m_normalize; 
+    DatasetInfo *m_pTumorInfo;
+    DatasetInfo *m_pBrainInfo;
+    std::vector< Vector > positionsTumor;
+    std::vector< Vector > positionsBrain;
+    int idTumor;
+    int idBrain;
 
 };
 
