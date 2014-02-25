@@ -40,7 +40,7 @@ m_alpha( 0.5f),
 m_pointSize( 10.0f ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 3.0f ),
+m_corrThreshold( 1.96f ),
 m_export( false )
 {
 
@@ -173,25 +173,10 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			float trois_quart = 3.0f* (m_zMin + m_zMax) / 4.0f;
 			float v = (it->second - m_zMin) / (m_zMax - m_zMin);
 
-			if( it->second < quart )
-			{
-                R = (it->second - m_zMin) / (quart - m_zMin);
-                G = 0.0f;
-                B = 0.0f;
-                render = false;
-			}
-			else if(it->second >= quart && it->second < trois_quart)
-			{
-				R = 1.0f;
-				G = (it->second - quart) / (trois_quart - quart);
-				B = 0.0f;
-			}
-			else
-			{
-				R = 1.0f;
-				G = 1.0f;
-				B = v;
-			}
+			R = 1.0f;
+			G = 1.0f-v;
+			B = 0.0f;
+
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
