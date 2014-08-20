@@ -195,7 +195,7 @@ Anatomy::Anatomy( const int type )
 Anatomy::Anatomy( const wxString &filename, const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
+ // m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
