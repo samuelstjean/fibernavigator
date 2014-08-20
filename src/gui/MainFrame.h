@@ -21,6 +21,7 @@ class ToolBar;
 class MenuBar;
 class SceneObject;
 class SelectionObject;
+class SelectionTree;
 class TrackingWindow;
 class FMRIWindow;
 
@@ -63,6 +64,8 @@ public:
     long getCurrentListIndex() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
+    
+    void clearCachedSceneInfo();
 
     bool canDraw3D() const          { return m_draw3d; }
     bool canDrawRound() const       { return m_drawRound; }
@@ -78,7 +81,7 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     SelectionObject* getCurrentSelectionObject();
-
+    bool buildSelectionViewFromSelectionTree( SelectionTree *pSelTree );
 
 public:
     PropertiesWindow    *m_pPropertiesWindow;
@@ -198,6 +201,7 @@ private:
     void onTimerEvent                       ( wxTimerEvent&   evt );
     void setTimerSpeed();
     void createNewSelectionObject( ObjectType i_newSelectionObjectType );
+    bool buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj );
 
     void onSelectDrawer                     ( wxCommandEvent& evt );
     void onSwitchDrawer                     ( wxCommandEvent& evt );
@@ -225,9 +229,7 @@ private:
     MenuBar             *m_pMenuBar;       
     wxSizer             *m_pCurrentSizer;
     SceneObject         *m_pCurrentSceneObject;
-//     SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListIndex;
-//     long                m_lastSelectedListItem;
 
     wxString            m_lastPath;
 

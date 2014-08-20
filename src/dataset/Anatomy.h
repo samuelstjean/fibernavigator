@@ -91,11 +91,13 @@ public:
     void draw(){};
 
     bool load( nifti_image *pHeader, nifti_image *pBody );
-    virtual bool save( wxXmlNode *pNode ) const;
+    virtual bool save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void saveNifti( wxString fileName );
+    void saveToNewFilename( const wxString &fullPath );
 
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
+    bool usingEqualizedDataset()      { return m_useEqualizedDataset; }
 
     virtual void createPropertiesSizer( PropertiesWindow *pParentWindow );
     virtual void updatePropertiesSizer();
@@ -120,7 +122,6 @@ public:
 
 public:
     bool  m_isSegmentOn;
-    SelectionObject *m_pRoi;
 
 private:
     wxButton        *m_pBtnCut;

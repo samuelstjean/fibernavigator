@@ -246,6 +246,48 @@ void PropertiesWindow::OnApplyDifferentColors( wxEvent& WXUNUSED(event) )
     m_pMainFrame->refreshAllGLWidgets();
 }
 
+void PropertiesWindow::OnMergeVisibleFibers( wxEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnMergeVisibleFibers" ), LOGLEVEL_DEBUG );
+
+    vector<Fibers *> bundles;
+    vector<long> indicesToRemove;
+    
+    // Search for currently visible bundles (Fibers objects)
+    for( unsigned int index= m_pMainFrame->m_pListCtrl->GetItemCount()-1; index > 0; --index )
+    {
+        DatasetInfo* pDatasetInfo = DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+
+        // Check if the list item is a currently visible Fibers object
+        if( pDatasetInfo->getType() == FIBERS && pDatasetInfo->getShow() )
+        {
+            bundles.push_back( (Fibers*)pDatasetInfo );
+            indicesToRemove.push_back( index );
+        }
+    }
+
+    if( bundles.empty() )
+    {
+        return;
+    }
+
+    // Create merged bundle (Fibers object)
+    Fibers* pFibers = new Fibers();
+    pFibers->createFrom( bundles, wxT("Merged") );
+
+    // Remove bundles (Fibers objects) being merged
+    for (std::vector<long>::iterator it = indicesToRemove.begin(); it != indicesToRemove.end(); ++it)
+    {
+        m_pMainFrame->m_pListCtrl->DeleteItem( *it );
+    }
+
+    // Insert the merged bundle (Fibers object)
+    DatasetIndex index = DatasetManager::getInstance()->addFibers( pFibers );
+    m_pMainFrame->m_pListCtrl->InsertItem( index );
+
+    m_pMainFrame->refreshAllGLWidgets();
+}
+
 void PropertiesWindow::OnClickApplyBtn( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnClickApplyBtn" ), LOGLEVEL_DEBUG );
@@ -368,13 +410,6 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
             m_pMainFrame->m_pTrackingWindow->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
             
 
-        }
-        else if( l_current->getType() < RGB )
-        {
-            Anatomy* a = (Anatomy*)l_current;
-            if( a->m_pRoi )
-                a->m_pRoi->setThreshold( l_threshold );
-			
         }
 
         // This slider will set the Brightness level. Currently only the glyphs uses this value.
@@ -574,7 +609,6 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     
     if( selTree.isEmpty() || pCurObj == NULL )
     {
-        pSelectionObject->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelectionObject );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -583,8 +617,6 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        pSelectionObject->setIsFirstLevel( false );
-        
         int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelectionObject );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
@@ -1389,7 +1421,7 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 // This function will be triggered when the user click on the display convex hull
 // button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 {
     SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
@@ -1404,7 +1436,7 @@ void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 // This function will be triggered when the user click on the color button
 // beside the display convex hull button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullColorChange" ), LOGLEVEL_DEBUG );
@@ -1429,7 +1461,7 @@ void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) 
     }
 }
 
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullOpacityChange" ), LOGLEVEL_DEBUG );

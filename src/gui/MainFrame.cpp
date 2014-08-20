@@ -28,6 +28,7 @@
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../version/VersionString.h"
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
@@ -42,6 +43,9 @@
 
 #include <algorithm>
 using std::for_each;
+#include <iostream>
+#include <sstream>
+using std::ostringstream;
 
 #include <cmath>
 
@@ -357,6 +361,28 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
+
+int compareInputFile( const wxString &first, const wxString &second )
+{
+    int idxFirst, idxSecond;
+
+    for( int i= 0; i < NB_EXTENSIONS; ++i )
+    {
+        if( first.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxFirst = i;
+        }
+
+        if( second.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxSecond = i;
+        }
+    }
+
+    return idxFirst - idxSecond;
+}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
@@ -373,6 +399,9 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         m_lastPath = dialog.GetDirectory();
         dialog.GetPaths( l_fileNames );
     }
+
+    // Order list of files so fibers files will be at the end of the list.
+    l_fileNames.Sort( compareInputFile );
 
     unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
     if ( nbErrors )
@@ -495,6 +524,13 @@ void MainFrame::updateSliders()
     m_pGL0->changeOrthoSize();
     m_pGL1->changeOrthoSize();
     m_pGL2->changeOrthoSize();
+}
+
+void MainFrame::clearCachedSceneInfo()
+{
+    m_pCurrentSceneObject = NULL;
+    m_pCurrentSizer = NULL;
+    m_currentListIndex = -1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -624,7 +660,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             if( dialog.ShowModal() == wxID_OK )
             {
                 m_lastPath = dialog.GetDirectory();
-                l_anatomy->saveNifti( dialog.GetPath() );
+                l_anatomy->saveToNewFilename( dialog.GetPath() );
             }
         }
         else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == MAXIMAS )
@@ -1359,7 +1395,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     if( selTree.isEmpty() || pCurObj == NULL )
     {
-        pSelObj->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -1368,8 +1403,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     }
     else
     {
-        pSelObj->setIsFirstLevel( false );
-
         int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
@@ -1385,6 +1418,80 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     pSelObj->setTreeId( newSelectionObjectId );    
     SceneManager::getInstance()->setSelBoxChanged( true );
+}
+
+bool MainFrame::buildSelectionViewFromSelectionTree( SelectionTree *pSelTree )
+{
+    if( pSelTree->isEmpty() )
+    {
+        return true;
+    }
+    
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    SelectionTree::SelectionObjectVector rootObjs = pSelTree->getDirectChildrenObjects( 0 );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(rootObjs.begin()); objIt != rootObjs.end(); ++objIt )
+    {
+        int itemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );    
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
+}
+
+bool MainFrame::buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj )
+{
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    int curSelObjTreeId = pSelTree->getId( pCurSelObj );
+    SelectionTree::SelectionObjectVector childObjs = pSelTree->getDirectChildrenObjects( curSelObjTreeId );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(childObjs.begin()); objIt != childObjs.end(); ++objIt )
+    {
+        int childItemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( childItemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( pCurSelObj->getTreeId(), (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
 }
 
 
@@ -1714,15 +1821,20 @@ void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 /**/
 void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString rev = _T( "ea8312dd52" );
-    rev = rev.AfterFirst('$');
-    rev = rev.BeforeLast('$');
-    wxString date = _T( "2013-04-15" );
-    date = date.AfterFirst( '$' );
-    date = date.BeforeLast( '$' );
-    (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
-                        + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    std::string fullSha1( VERSION_GIT_SHA1 );
+    std::string buildDate( VERSION_BUILD_DATE );
+    std::string buildTime( VERSION_BUILD_TIME );
     
+    ostringstream oss;
+    oss << "Fibernavigator: a tool for interactive MRI images and streamlines exploration." << std::endl << std::endl;
+    oss << "For documentation and release information, please visit our website: " << "http://scilus.github.io/fibernavigator/" << std::endl << std::endl;
+    oss << "Current contributors: https://github.com/scilus/fibernavigator/wiki/Current-contributors" << std::endl;
+    oss << "Past contributors: https://github.com/scilus/fibernavigator/wiki/Past-contributors" << std::endl << std::endl;
+    oss << "Built on Git revision: " << fullSha1.substr(0, 10) << std::endl;
+    oss << "Build date: " << buildDate << ", " << buildTime << std::endl;
+    
+    wxString wxMes( oss.str().c_str(), wxConvUTF8 );
+    (void)wxMessageBox(wxMes, _T( "About the Fibernavigator" ) );
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
@@ -1857,8 +1969,55 @@ void MainFrame::refreshViews()
 
 void MainFrame::updateStatusBar()
 {
-    GetStatusBar()->SetStatusText( wxString::Format( 
-        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
+    float value( 0 );
+    long index = getCurrentListIndex();
+    if( index != -1)
+    {
+        DatasetIndex idx = m_pListCtrl->GetItem( index );
+        DatasetInfo* pDataset = DatasetManager::getInstance()->getDataset( idx );
+        Anatomy* pAnat = dynamic_cast<Anatomy*>( pDataset );
+		
+        if( pAnat != NULL && pAnat->getType() != RGB )
+        {
+            //Picked position
+            int rows = pAnat->getRows();
+            int columns = pAnat->getColumns();
+            int ind = ( m_pXSlider->GetValue() + m_pYSlider->GetValue() * columns + m_pZSlider->GetValue() * columns * rows );
+			
+            //Float dataset
+            if( !pAnat->usingEqualizedDataset() )
+            {
+                float maxValue( 1.0f );
+                switch( pAnat->getType() )
+                {
+                    case HEAD_BYTE:
+                    {
+                        maxValue = 255.0;
+                        break;
+                    }
+                    case HEAD_SHORT:
+                    {
+                        maxValue = pAnat->getNewMax();
+                        break;
+                    }
+                    case OVERLAY:
+                    {
+                        maxValue = pAnat->getOldMax();
+                        break;
+                    }
+                }
+                //Denormalize
+                value = (* ( pAnat->getFloatDataset() ) )[ind] * maxValue;
+            }
+            //Equalized dataset
+            else
+            {
+                value = (* ( pAnat->getEqualizedDataset() ) )[ind];
+            }
+        }
+    }
+	
+    GetStatusBar()->SetStatusText( wxString::Format(wxT("Pos: %d  %d  %d Value %.2f" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue(), value ), 0 );
     Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
 }
 
@@ -2134,9 +2293,6 @@ void MainFrame::onTreeChange()
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
-
-// TODO selection ICI still needed? Les types still requis?
-
 
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {

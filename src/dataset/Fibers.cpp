@@ -1,4 +1,5 @@
 /*
+
  *  The Fibers class implementation.
  *
  */
@@ -7,6 +8,7 @@
 
 #include "Anatomy.h"
 #include "DatasetManager.h"
+#include "RTTrackingHelper.h"
 
 #include "../main.h"
 #include "../Logger.h"
@@ -110,7 +112,7 @@ Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
     
-    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
+    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getDatasetIndex() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
@@ -1349,26 +1351,25 @@ bool Fibers::loadDmri( const wxString &filename )
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
-    res = fscanf( pFile, "%d %f", &m_countLines, &f2 );
+    res = fscanf( pFile, "%s %s", pS1, pS2 );
+    m_countLines = std::atof(pS1);
     
-    delete[] pS1;
-    delete[] pS2;
-    delete[] pS3;
-    delete[] pS4;
-    
-    pS1 = NULL;
-    pS2 = NULL;
-    pS3 = NULL;
-    pS4 = NULL;
-    
-    // the list of points
     vector< vector< float > > lines;
     m_countPoints = 0;
     float back, front;
+    stringstream ss;
 
     for( int i = 0; i < m_countLines; i++ )
     {
-        res = fscanf( pFile, "%f %f %f", &back, &front, &f1 );
+        res = fscanf( pFile, "%s %s %s", pS1, pS2, pS3 );
+
+        ss << pS1;
+        ss >> back;
+        ss.clear();
+        ss << pS2;
+        ss >> front;
+        ss.clear();
+        
         int nbpoints = back + front;
 
         if( back != 0 && front != 0 )
@@ -1384,7 +1385,21 @@ bool Fibers::loadDmri( const wxString &filename )
             //back
             for( int j = back - 1; j >= 0; j-- )
             {
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
+                
+              
+                ss << pS1;
+                ss >> f1;
+                ss.clear();
+
+                ss << pS2;
+                ss >> f2;
+                ss.clear();
+                
+                ss << pS3;
+                ss >> f3;
+                ss.clear();
+                
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1393,13 +1408,26 @@ bool Fibers::loadDmri( const wxString &filename )
             if( back != 0 && front != 0 )
             {
                 //repeated pts
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
             }
 
             //front
             for( int j = back; j < nbpoints; j++ )
             {
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
+                
+                ss << pS1;
+                ss >> f1;
+                ss.clear();
+
+                ss << pS2;
+                ss >> f2;
+                ss.clear();
+                
+                ss << pS3;
+                ss >> f3;
+                ss.clear();
+                
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1411,6 +1439,15 @@ bool Fibers::loadDmri( const wxString &filename )
     }
 
     fclose( pFile );
+    
+    delete[] pS1;
+    delete[] pS2;
+    delete[] pS3;
+    delete[] pS4;
+    pS1 = NULL;
+    pS2 = NULL;
+    pS3 = NULL;
+    pS4 = NULL;
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
@@ -1462,6 +1499,51 @@ bool Fibers::loadDmri( const wxString &filename )
 #else
     m_name = /*"-" +*/ filename.AfterLast( '/' );
 #endif
+    return true;
+}
+
+bool Fibers::createFrom( const vector<Fibers*>& bundles, wxString name )
+{
+    m_pointArray.clear();
+    m_colorArray.clear();
+    m_linePointers.clear();
+    m_reverse.clear();
+
+    m_linePointers.push_back(0);
+    // Copy points, copy colors, set line pointers and set reverse lookup
+    for( vector<Fibers *>::const_iterator it = bundles.begin(); it != bundles.end(); ++it )
+    {
+        for( int i=0; i < (*it)->m_countPoints * 3; ++i )
+        {
+            m_pointArray.push_back( (*it)->m_pointArray[i] );
+            m_colorArray.push_back( (*it)->m_colorArray[i] );
+        }
+
+        for( int i=1; i <= (*it)->m_countLines; ++i )
+        {
+            int length = (*it)->m_linePointers[i] - (*it)->m_linePointers[i-1];
+
+            for( int j=0; j < length; ++j )
+            {
+                m_reverse.push_back( m_linePointers.size()-1 );
+            }
+
+            m_linePointers.push_back( m_linePointers.back() + length );
+        }
+    }
+
+    m_countPoints = m_pointArray.size() / 3;
+    m_countLines  = m_linePointers.size() - 1;
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = wxString(name);
+    m_name = wxString(name);
+
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+
     return true;
 }
 
@@ -1862,7 +1944,8 @@ void Fibers::colorWithDistance( float *pColorData )
 
         for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
-            if( simplifiedList[j]->m_sourceAnatomy != NULL )
+            // TODO selection VOI adjust
+            /*if( simplifiedList[j]->m_sourceAnatomy != NULL )
             {
                 float curValue = simplifiedList[j]->m_sourceAnatomy->at( index );
 
@@ -1870,7 +1953,7 @@ void Fibers::colorWithDistance( float *pColorData )
                 {
                     minDistance = curValue;
                 }
-            }
+            }*/
         }
 
         float thresh = m_threshold / 2.0f;
@@ -1939,13 +2022,13 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
-                // TODO selection m_sourceanat
-                float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
+                // TODO selection VOI m_sourceanat
+                /*float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
                 if( curValue < minDistance )
                 {
                     minDistance = curValue;
-                }
+                }*/
             }
         }
 
@@ -2248,12 +2331,12 @@ void Fibers::save( wxString filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Fibers::save( wxXmlNode *pNode ) const
+bool Fibers::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }
@@ -3392,12 +3475,19 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
     //////////////////////////////////////////////////////////////////////////
-    float minLength = getMinFibersLength();
-    float maxLength = getMaxFibersLength();
+
+    // Round to make sure the min and max length sliders reach the real maximal values.
+    int minLength = static_cast<int>( std::floor( getMinFibersLength() ) );
+    int maxLength = static_cast<int>( std::ceil( getMaxFibersLength() ) );
 
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
+                                            FIBERS_SUBSAMPLING_RANGE_START, 
+                                            FIBERS_SUBSAMPLING_RANGE_MIN,
+                                            FIBERS_SUBSAMPLING_RANGE_MAX , 
+                                            DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
@@ -3501,6 +3591,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     m_pRadNormalColoring->SetValue( true );
+    
+    updateFibersFilters();
 }
 
 void Fibers::updatePropertiesSizer()
@@ -3604,7 +3696,12 @@ void Fibers::updatePropertiesSizer()
 bool Fibers::toggleShow()
 {
     SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
-    return DatasetInfo::toggleShow();
+	DatasetInfo::toggleShow();
+	if(getShow())
+	{
+		SceneManager::getInstance()->setSelBoxChanged(true);
+	}
+	return getShow();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -3863,13 +3960,9 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
-
-    // TODO what is the use of this?
-#ifdef __WXMSW__
-    m_name = wxT( "RTTFibers" );
-#else
-    m_name = wxT( "RTTFibers" );
-#endif
+	
+	wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
+    m_name = wxT( "RTTFibers" + id );
 
 	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
 }
