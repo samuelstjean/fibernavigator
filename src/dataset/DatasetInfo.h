@@ -173,5 +173,6 @@ protected:
     
 	Vector      m_origin;
     DatasetIndex m_dsIndex;
+};
 
 #endif /*DATASETINFO_H_*/
