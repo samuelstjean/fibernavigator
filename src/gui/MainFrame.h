@@ -170,6 +170,18 @@ private:
     void onAbout                            ( wxCommandEvent& evt );
     void onShortcuts                        ( wxCommandEvent& evt );
     void onScreenshot                       ( wxCommandEvent& evt );
+    void onScreenshotTransparencySaved      ( wxCommandEvent& evt );
+    void onScreenshotTransparencyInverted   ( wxCommandEvent& evt );
+    void onSetScreenshotResolution2048      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution4096      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution8192      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution16384     ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth1          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth2          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth4          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth8          ( wxCommandEvent& evt );
+
+
     void onWarningsInformations             ( wxCommandEvent& evt );
 
     // List widget event functions     

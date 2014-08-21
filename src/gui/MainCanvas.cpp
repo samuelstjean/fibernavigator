@@ -703,17 +703,19 @@ void MainCanvas::render()
             if( SceneManager::getInstance()->isScreenshotScheduled() )
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
-                // FIXME: Screenshot crashes the GUI
-                int size = 2048;
 
-                FgeOffscreen fbo( size, size, true );
+                int size = SceneManager::getInstance()->getScreenshotResolution();
+                glLineWidth(SceneManager::getInstance()->getScreenshotLineWidth()); 
+
+                FgeOffscreen fbo( size, size, false );
+
                 if( SceneManager::getInstance()->getClearToBlack() )
                 {
-                    fbo.setClearColor( 0.0f, 0.0f, 0.0f);
+                    fbo.setClearColor( 0.0f, 0.0f, 0.0f, 0.0f);
                 } 
                 else 
                 {
-                    fbo.setClearColor( 1.0f, 1.0f, 1.0f);
+                    fbo.setClearColor( 1.0f, 1.0f, 1.0f, 1.0f);
                 }
                 fbo.activate();
 
@@ -729,7 +731,11 @@ void MainCanvas::render()
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
-                fbo.getTexObject( 1 )->saveImageToPPM( SceneManager::getInstance()->getScreenshotName().mb_str() );
+                fbo.getTexObject( 1 )->saveImageToPNG( 
+                    SceneManager::getInstance()->getScreenshotName().mb_str(), 
+                    SceneManager::getInstance()->isScreenshotTransparencySaved(), 
+                    SceneManager::getInstance()->isScreenshotTransparencyInverted() );
+                  
                 fbo.deactivate();
                 SceneManager::getInstance()->setScreenshotScheduled( false );
             }

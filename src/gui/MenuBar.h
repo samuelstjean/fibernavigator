@@ -30,6 +30,20 @@ public:
         wxMenu      *m_menuNewAnatomy;
             wxMenuItem  *m_itemNewAnatomyByte;
             wxMenuItem  *m_itemNewAnatomyRGB;
+        wxMenu      *m_menuScreenshot;
+            wxMenuItem  *m_itemScreenshot;
+            wxMenu      *m_menuScreenshotResolution;
+                wxMenuItem  *m_itemScreenshotResolution2048;
+                wxMenuItem  *m_itemScreenshotResolution4096;
+                wxMenuItem  *m_itemScreenshotResolution8192; 
+                wxMenuItem  *m_itemScreenshotResolution16384;            
+            wxMenu      *m_menuScreenshotLineWidth;
+                wxMenuItem  *m_itemScreenshotLineWidth1;
+                wxMenuItem  *m_itemScreenshotLineWidth2;
+                wxMenuItem  *m_itemScreenshotLineWidth4;
+                wxMenuItem  *m_itemScreenshotLineWidth8;
+            wxMenuItem  *m_itemScreenshotTransparencySaved;
+            wxMenuItem  *m_itemScreenshotTransparencyInverted;
         wxMenuItem  *m_itemSaveSCN;
         wxMenuItem  *m_itemSaveSelectedFibers;
         wxMenuItem  *m_itemSaveSelectedSurface;
@@ -112,7 +126,6 @@ public:
      wxMenu         *m_menuHelp;
         wxMenuItem  *m_itemAbout;
         wxMenuItem  *m_itemKeyboardShortcuts;
-        wxMenuItem  *m_itemScreenShot;
         wxMenuItem  *m_itemWarningsInfo;
 };
 

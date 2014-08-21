@@ -51,8 +51,7 @@ class FgeGLTexture
     unsigned int getHeight() const { return height; };
 
     //! save the image in the opengl texture to a ppm
-    void saveImageToPPM(const char* filename);
-
+    void saveImageToPNG(const char* filename, bool isEnableAlpha, bool isFlipAlpha);
 
   private:
     GLenum target;

@@ -56,6 +56,8 @@ public:
     bool isSagittalDisplayed() const        { return m_showSagittal; }
     bool isCrosshairDisplayed() const       { return m_showCrosshair; }
     bool areAxesDisplayed() const           { return m_showAxes; }
+    bool isScreenshotTransparencySaved() const    { return m_ScreenshotTransparencySaved; }
+    bool isScreenshotTransparencyInverted() const { return m_ScreenshotTransparencyInverted; }
 
     bool toggleLightingDisplay()        { return m_lighting       = !m_lighting; }
     bool toggleAlphaBlend()             { return m_blendAlpha     = !m_blendAlpha; }
@@ -65,6 +67,8 @@ public:
     bool toggleSagittalDisplay()        { return m_showSagittal   = !m_showSagittal; }
     bool toggleCrosshairDisplay()       { return m_showCrosshair  = !m_showCrosshair; }
     bool toggleAxesDisplay()            { return m_showAxes       = !m_showAxes; }
+    bool toggleScreenshotTransparencySaved()  { return m_ScreenshotTransparencySaved = !m_ScreenshotTransparencySaved; }
+    bool toggleScreenshotTransparencyInverted(){ return m_ScreenshotTransparencyInverted = !m_ScreenshotTransparencyInverted; }
     
     float getSliceX() const         { return m_sliceX; }
     float getSliceY() const         { return m_sliceY; }
@@ -121,6 +125,11 @@ public:
     wxString getScreenshotPath() const { return m_screenshotPath; }
     void setScreenshotName( const wxString &name )  { m_screenshotName = name; }
     void setScreenshotPath( const wxString &path )  { m_screenshotPath = path; }
+
+    void setScreenshotLineWidth( const int width ) { m_ScreenshotLineWidth = width; }
+    int getScreenshotLineWidth() const {return m_ScreenshotLineWidth;}
+    void setScreenshotResolution( const int resolution ) { m_ScreenshotResolution = resolution; }
+    int getScreenshotResolution() const {return m_ScreenshotResolution;}
 
     bool getClearToBlack() const { return m_clearToBlack; }
     bool toggleClearToBlack()    { return m_clearToBlack = !m_clearToBlack; }
@@ -228,6 +237,12 @@ private:
     bool                    m_isRulerActive;
     double                  m_rulerFullLength;
     double                  m_rulerPartialLength;
+
+    //screenshot
+    bool m_ScreenshotTransparencySaved;
+    bool m_ScreenshotTransparencyInverted;
+    int m_ScreenshotResolution;
+    int m_ScreenshotLineWidth;
 };
 
 #endif //SCENEMANAGER_H_

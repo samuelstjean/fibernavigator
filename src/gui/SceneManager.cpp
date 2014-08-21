@@ -78,7 +78,11 @@ SceneManager::SceneManager(void)
     m_selBoxChanged( true ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
-    m_rulerPartialLength( 0.0 )
+    m_rulerPartialLength( 0.0 ),
+    m_ScreenshotTransparencySaved( false ),
+    m_ScreenshotTransparencyInverted( false ),
+    m_ScreenshotResolution( 2048 ),
+    m_ScreenshotLineWidth(1)
 {
     m_pAnatomyHelper = new AnatomyHelper();
     m_pTheScene = new TheScene();
