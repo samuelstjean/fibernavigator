@@ -26,7 +26,7 @@ AnatomyHelper::AnatomyHelper()
 
 ///////////////////////////////////////////////////////////////////////////
 // Destructor
-AnatomyHelper::~AnatomyHelper() 
+AnatomyHelper::~AnatomyHelper()
 {
 }
 
@@ -72,7 +72,7 @@ void AnatomyHelper::renderNav( int pView )
 
     switch( pView )
     {
-        case AXIAL: 
+        case AXIAL:
         {
             float sliceZ = SceneManager::getInstance()->getSliceZ();
             glBegin( GL_QUADS );
@@ -88,7 +88,7 @@ void AnatomyHelper::renderNav( int pView )
             break;
         }
 
-        case CORONAL: 
+        case CORONAL:
         {
             float sliceY = SceneManager::getInstance()->getSliceY();
             glBegin( GL_QUADS );
@@ -104,7 +104,7 @@ void AnatomyHelper::renderNav( int pView )
             break;
         }
 
-        case SAGITTAL: 
+        case SAGITTAL:
         {
             float sliceX = SceneManager::getInstance()->getSliceX();
             glBegin( GL_QUADS );
@@ -126,7 +126,7 @@ void AnatomyHelper::renderNav( int pView )
     glPopAttrib();
     Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glPopAttrib") );
 
-    glLineWidth( 1.0f );
+    glLineWidth( 3.0f );
     glColor3f( 1.0f, 0.0f, 0.0f );
     glBegin( GL_LINES );
         glVertex3f( 0    , yLine, lineZ );
@@ -176,7 +176,7 @@ void AnatomyHelper::renderMain()
 void AnatomyHelper::renderCrosshair()
 {
     float offset = 0.02f;
-    glLineWidth( 1.0 );
+    glLineWidth( 3.0 );
 
     glBegin( GL_LINES );
         glVertex3f( m_x - offset, m_y - offset,  0    );

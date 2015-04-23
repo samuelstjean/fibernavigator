@@ -178,13 +178,13 @@ void TheScene::initGL( int whichView )
 void TheScene::bindTextures()
 {
     static bool overflowMessageRecentlySent = false;
-    
+
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
     Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glTexEnvf") );
-    
+
     int allocatedTextureCount = 0;
-    
+
     int maxTextureNb = RenderManager::getInstance()->getNbMaxTextures();
 
     for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
@@ -207,9 +207,9 @@ void TheScene::bindTextures()
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                 glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
             }
-            
+
             Logger::getInstance()->printIfGLError( wxT( "TheScene::bindTextures - glTexParameteri") );
-            
+
             if ( ++allocatedTextureCount >= maxTextureNb )
             {
                 if( !overflowMessageRecentlySent )
@@ -219,12 +219,12 @@ void TheScene::bindTextures()
                     Logger::getInstance()->print( mes , LOGLEVEL_WARNING );
                     overflowMessageRecentlySent = true;
                 }
-                
+
                 break;
             }
         }
     }
-    
+
     // In case the number of anatomies to show goes back down under the
     // maximum number of texture units, we reset the overflow message variable.
     // That way, we can show the message again if the problem rehappens.
@@ -242,7 +242,7 @@ void TheScene::bindTextures()
 void TheScene::renderScene()
 {
     Logger::getInstance()->printIfGLError( wxT( "Error before renderScene" ) );
-    // This will put the frustum information up to date for any render that needs it. 
+    // This will put the frustum information up to date for any render that needs it.
     extractFrustum();
 
     if( MyApp::frame->m_pListCtrl->GetItemCount() == 0 )
@@ -296,8 +296,8 @@ void TheScene::renderScene()
         if( m_posSagital > columns )
             m_posSagital = 0;
 
-        SceneManager::getInstance()->updateView( m_posSagital, 
-                                                 SceneManager::getInstance()->getSliceY(), 
+        SceneManager::getInstance()->updateView( m_posSagital,
+                                                 SceneManager::getInstance()->getSliceY(),
                                                  SceneManager::getInstance()->getSliceZ() );
         MyApp::frame->m_pXSlider->SetValue( m_posSagital );
     }
@@ -355,7 +355,7 @@ void TheScene::renderScene()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// This function will extracts the numbers and fill the m_frustum array with 
+// This function will extracts the numbers and fill the m_frustum array with
 // the location of the planes for the frustum culling.
 //
 // See the tutorial here to understand : http://www.crownandcutlass.com/features/technicaldetails/frustum.html
@@ -411,8 +411,8 @@ void TheScene::extractFrustum()
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   float normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[0][0] * SceneManager::getInstance()->m_frustum[0][0] + 
-                                   SceneManager::getInstance()->m_frustum[0][1] * SceneManager::getInstance()->m_frustum[0][1] + 
+   float normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[0][0] * SceneManager::getInstance()->m_frustum[0][0] +
+                                   SceneManager::getInstance()->m_frustum[0][1] * SceneManager::getInstance()->m_frustum[0][1] +
                                    SceneManager::getInstance()->m_frustum[0][2] * SceneManager::getInstance()->m_frustum[0][2] );
    SceneManager::getInstance()->m_frustum[0][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[0][1] /= normalizationTerm;
@@ -427,8 +427,8 @@ void TheScene::extractFrustum()
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[1][0] * SceneManager::getInstance()->m_frustum[1][0] + 
-                             SceneManager::getInstance()->m_frustum[1][1] * SceneManager::getInstance()->m_frustum[1][1] + 
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[1][0] * SceneManager::getInstance()->m_frustum[1][0] +
+                             SceneManager::getInstance()->m_frustum[1][1] * SceneManager::getInstance()->m_frustum[1][1] +
                              SceneManager::getInstance()->m_frustum[1][2] * SceneManager::getInstance()->m_frustum[1][2] );
    SceneManager::getInstance()->m_frustum[1][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[1][1] /= normalizationTerm;
@@ -443,8 +443,8 @@ void TheScene::extractFrustum()
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[2][0] * SceneManager::getInstance()->m_frustum[2][0] + 
-                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1] + 
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[2][0] * SceneManager::getInstance()->m_frustum[2][0] +
+                             SceneManager::getInstance()->m_frustum[2][1] * SceneManager::getInstance()->m_frustum[2][1] +
                              SceneManager::getInstance()->m_frustum[2][2] * SceneManager::getInstance()->m_frustum[2][2] );
    SceneManager::getInstance()->m_frustum[2][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[2][1] /= normalizationTerm;
@@ -459,8 +459,8 @@ void TheScene::extractFrustum()
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[3][0] * SceneManager::getInstance()->m_frustum[3][0] + 
-                             SceneManager::getInstance()->m_frustum[3][1] * SceneManager::getInstance()->m_frustum[3][1] + 
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[3][0] * SceneManager::getInstance()->m_frustum[3][0] +
+                             SceneManager::getInstance()->m_frustum[3][1] * SceneManager::getInstance()->m_frustum[3][1] +
                              SceneManager::getInstance()->m_frustum[3][2] * SceneManager::getInstance()->m_frustum[3][2] );
    SceneManager::getInstance()->m_frustum[3][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[3][1] /= normalizationTerm;
@@ -475,8 +475,8 @@ void TheScene::extractFrustum()
 
    // Normalize the result.
    // Since we only use the frustum information for box bounding object, we do not need to normalize the values.
-   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[4][0] * SceneManager::getInstance()->m_frustum[4][0] + 
-                             SceneManager::getInstance()->m_frustum[4][1] * SceneManager::getInstance()->m_frustum[4][1] + 
+   normalizationTerm = sqrt( SceneManager::getInstance()->m_frustum[4][0] * SceneManager::getInstance()->m_frustum[4][0] +
+                             SceneManager::getInstance()->m_frustum[4][1] * SceneManager::getInstance()->m_frustum[4][1] +
                              SceneManager::getInstance()->m_frustum[4][2] * SceneManager::getInstance()->m_frustum[4][2] );
    SceneManager::getInstance()->m_frustum[4][0] /= normalizationTerm;
    SceneManager::getInstance()->m_frustum[4][1] /= normalizationTerm;
@@ -772,7 +772,7 @@ void TheScene::lightsOff()
 //
 // i_x      :
 // i_y      :
-// i_z      : 
+// i_z      :
 // i_r      :
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
@@ -794,64 +794,64 @@ void TheScene::drawSphere( float xPos, float yPos, float zPos, float ray )
 void TheScene::drawSelectionObjects()
 {
     SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-    
+
     // TODO do all the processing only if there is at least one selection object
-    
+
     // Draw selection objects that are not VOIs.
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
         SelectionVOI *pObjAsVOI = dynamic_cast<SelectionVOI*>( selectionObjects[objIdx] );
-        
+
         if( pObjAsVOI == NULL )
         {
             glPushAttrib( GL_ALL_ATTRIB_BITS );
-            
+
             selectionObjects[objIdx]->draw();
-            
+
             glPopAttrib();
         }
     }
-    
+
     // Setup to draw VOIs.
     glPushAttrib( GL_ALL_ATTRIB_BITS );
-    
+
     if( SceneManager::getInstance()->isLightingActive() )
     {
         lightsOn();
     }
-    
+
     bindTextures();
-    
+
     ShaderProgram *pMeshShader = ShaderHelper::getInstance()->getMeshShader();
     pMeshShader->bind();
     ShaderHelper::getInstance()->setMeshShaderVars();
-    
+
     if( SceneManager::getInstance()->isPointMode() )
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     else
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    
+
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    
+
     pMeshShader->setUniInt  ( "showFS", true );
     pMeshShader->setUniInt  ( "useTex", false );
     pMeshShader->setUniFloat( "alpha_", 1.0 );
-    
+
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
         SelectionVOI *pObjAsVOI = dynamic_cast<SelectionVOI*>( selectionObjects[objIdx] );
-        
+
         if( pObjAsVOI != NULL )
         {
             selectionObjects[objIdx]->draw();
         }
     }
-    
+
     pMeshShader->release();
-    
+
     lightsOff();
-    
+
     glPopAttrib();
 
     Logger::getInstance()->printIfGLError( wxT( "Draw selection objects" ) );
@@ -887,7 +887,7 @@ void TheScene::drawColorMapLegend()
 
     ShaderHelper::getInstance()->getLegendShader()->release();
 
-    glLineWidth( 1.0f );
+    glLineWidth( 3.0f );
     glColor3f( 0.0f, 0.0f, 0.0f );
     glBegin( GL_LINES );
     glVertex3i( maxSize - 60, 10, 2900 );
@@ -928,7 +928,7 @@ void TheScene::drawVectors()
         if( pInfo->getType() == VECTORS && pInfo->getShow() )
         {
             Anatomy* pVecs = (Anatomy*)pInfo;
-            glLineWidth( 1.0 );
+            glLineWidth( 3.0 );
             glBegin( GL_LINES );
 
             float r, g, b, a;
@@ -943,19 +943,19 @@ void TheScene::drawVectors()
 
             int quadrant = SceneManager::getInstance()->getQuadrant();
 
-            bool topview = quadrant == 2 || 
-                           quadrant == 3 || 
-                           quadrant == 6 || 
+            bool topview = quadrant == 2 ||
+                           quadrant == 3 ||
+                           quadrant == 6 ||
                            quadrant == 7;
 
-            bool leftview = quadrant == 5 || 
+            bool leftview = quadrant == 5 ||
                             quadrant == 6 ||
-                            quadrant == 7 || 
+                            quadrant == 7 ||
                             quadrant == 8;
 
-            bool frontview = quadrant == 3 || 
-                             quadrant == 4 || 
-                             quadrant == 5 || 
+            bool frontview = quadrant == 3 ||
+                             quadrant == 4 ||
+                             quadrant == 5 ||
                              quadrant == 6;
 
             float columns = DatasetManager::getInstance()->getColumns();

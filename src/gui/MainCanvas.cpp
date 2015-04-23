@@ -139,7 +139,7 @@ void MainCanvas::OnSize( wxSizeEvent& evt )
     Logger::getInstance()->print( wxT( "Event triggered - MainCanvas::OnSize" ), LOGLEVEL_DEBUG );
     // this is also necessary to update the context on some platforms
 
-    int w, h; 
+    int w, h;
     GetClientSize( &w, &h );
     m_pArcBall->setBounds( (GLfloat) w, (GLfloat) h );
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
@@ -183,7 +183,7 @@ void MainCanvas::OnMouseEvent( wxMouseEvent& evt )
             }
 
             if ( evt.MiddleIsDown() )
-            {               
+            {
                 processMiddleMouseDown( evt, clickX, clickY );
             }
             else
@@ -284,7 +284,7 @@ void MainCanvas::processLeftMouseDown( int clickX, int clickY, wxMouseEvent &evt
             m_isDragging = true; // Prepare For Dragging
         }
         else if(!m_isSceneLocked)
-        {                    
+        {
             Quat4fT ThisQuat;
             Matrix4fT transform = SceneManager::getInstance()->getTransform();
             m_pArcBall->drag( &m_mousePt, &ThisQuat ); // Update End Vector And Get Rotation As Quaternion
@@ -321,9 +321,9 @@ void MainCanvas::processLeftMouseUp( wxMouseEvent &evt )
 void MainCanvas::processMiddleMouseDown( wxMouseEvent &evt, int clickX, int clickY )
 {
     if ( !m_ismDragging)
-    {             
+    {
         if( SceneManager::getInstance()->isRulerActive() )
-        {                        
+        {
             m_hr = pick( evt.GetPosition(), true );
         }
 
@@ -349,7 +349,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
         if ( wxGetKeyState( WXK_CONTROL ) && wxGetKeyState( WXK_SHIFT ) )
         {
             Matrix4fT transform = SceneManager::getInstance()->getTransform();
-            Logger::getInstance()->print( wxString::Format( wxT( "Transform matrix:\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f" ), 
+            Logger::getInstance()->print( wxString::Format( wxT( "Transform matrix:\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f\n%2.8f : %2.8f : %2.8f" ),
                 transform.M[0], transform.M[1], transform.M[2],
                 transform.M[3], transform.M[4], transform.M[5],
                 transform.M[6], transform.M[7], transform.M[8]
@@ -492,8 +492,8 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
 
     //m_pDatasetHelper->doMatrixManipulation();
 
-    
-    //GLdouble modelview[16];    
+
+    //GLdouble modelview[16];
     GLfloat winX, winY;
     float columns = DatasetManager::getInstance()->getColumns();
     float rows    = DatasetManager::getInstance()->getRows();
@@ -503,7 +503,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
     //glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-    
+
     winX = (float) click.x;
     winY = (float) m_viewport[3] - (float) click.y;
 
@@ -583,7 +583,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
                     m_hitPts = bb->hitCoordinate(ray,AXIAL);
                     m_isDrawerHit = isRulerOrDrawer;
                 }
-            }            
+            }
         }
         bb->setSizeY( ySize );
         bb->setCenterY( yPos );
@@ -625,9 +625,9 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
      * check for hits with the selection object sizers
      */
     if( SceneManager::getInstance()->getShowAllSelObj() )
-    {        
+    {
         SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-        
+
         for ( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
         {
             hitResult hr1 = selectionObjects[objIdx]->hitTest( ray );
@@ -641,7 +641,7 @@ hitResult MainCanvas::pick( wxPoint click, bool isRulerOrDrawer)
             }
         }
     }
- 
+
     return hr;
 }
 
@@ -664,7 +664,7 @@ void MainCanvas::render()
     int w, h;
     GetClientSize( &w, &h );
     glViewport( 0, 0, (GLint) w, (GLint) h );
-	
+
     // Init OpenGL once, but after SetCurrent
     if ( !m_init )
     {
@@ -705,15 +705,15 @@ void MainCanvas::render()
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
 
                 int size = SceneManager::getInstance()->getScreenshotResolution();
-                glLineWidth(SceneManager::getInstance()->getScreenshotLineWidth()); 
+                glLineWidth(SceneManager::getInstance()->getScreenshotLineWidth());
 
                 FgeOffscreen fbo( size, size, false );
 
                 if( SceneManager::getInstance()->getClearToBlack() )
                 {
                     fbo.setClearColor( 0.0f, 0.0f, 0.0f, 0.0f);
-                } 
-                else 
+                }
+                else
                 {
                     fbo.setClearColor( 1.0f, 1.0f, 1.0f, 1.0f);
                 }
@@ -731,11 +731,11 @@ void MainCanvas::render()
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
-                fbo.getTexObject( 1 )->saveImageToPNG( 
-                    SceneManager::getInstance()->getScreenshotName().mb_str(), 
-                    SceneManager::getInstance()->isScreenshotTransparencySaved(), 
+                fbo.getTexObject( 1 )->saveImageToPNG(
+                    SceneManager::getInstance()->getScreenshotName().mb_str(),
+                    SceneManager::getInstance()->isScreenshotTransparencySaved(),
                     SceneManager::getInstance()->isScreenshotTransparencyInverted() );
-                  
+
                 fbo.deactivate();
                 SceneManager::getInstance()->setScreenshotScheduled( false );
             }
@@ -752,7 +752,7 @@ void MainCanvas::render()
                 SceneManager::getInstance()->getScene()->renderScene();
 
                 //add the hit Point to ruler point list
-                
+
                 if( SceneManager::getInstance()->isRulerActive() && !m_ismDragging && m_isRulerHit && (m_hr.picked == AXIAL || m_hr.picked == CORONAL || m_hr.picked == SAGITTAL))
                 {
                     vector< Vector > &v = SceneManager::getInstance()->getRulerPts();
@@ -792,7 +792,7 @@ void MainCanvas::render()
                 }
 
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
-                {	
+                {
 					m_pRealTimeFibers->seed();
                 }
                 else if(m_pRealTimeFibers->getSize() > 0)
@@ -822,19 +822,19 @@ void MainCanvas::render()
                 SceneManager::getInstance()->getAnatomyHelper()->renderNav( m_view );
                 Logger::getInstance()->printIfGLError( wxT( "Render nav view" ) );
             }
-    }    
+    }
     //glFlush();
-    SwapBuffers(); 
+    SwapBuffers();
 }
 
 void MainCanvas::renderRulerDisplay()
 {
     glColor3f( 0.0f, 0.6f, 0.95f );
-    glLineWidth (5);    
+    glLineWidth (5);
     float sphereSize = 0.35f;
     vector< Vector > v = SceneManager::getInstance()->getRulerPts();
     if( !v.empty() )
-    {        
+    {
         Vector pts;
         Vector lastPts = v[0];
         SceneManager::getInstance()->setRulerFullLength( 0.0 );
@@ -870,42 +870,42 @@ void MainCanvas::renderRulerDisplay()
 //                 sphereSize = 0.4f;
 //             }
 //             pts = m_pDatasetHelper->m_rulerPts[i];
-//             
-//             glBegin (GL_LINES);          
+//
+//             glBegin (GL_LINES);
 //                 glVertex3f (lastPts.x, lastPts.y, lastPts.z);
 //                 glVertex3f (pts.x, pts.y, pts.z);
-//             glEnd ();    
-// 
-//             
+//             glEnd ();
+//
+//
 //             SceneManager::getInstance()->getScene()->drawSphere( pts.x, pts.y, pts.z, sphereSize);
-//             
+//
 //             m_pDatasetHelper->m_rulerPartialLength = (lastPts - pts).getLength();
 //             m_pDatasetHelper->m_rulerFullLength += m_pDatasetHelper->m_rulerPartialLength;
 //             lastPts = pts;
 //         }
     }
-    glLineWidth (1);
+    glLineWidth (3);
 }
 
 void MainCanvas::renderAxes()
-{    
+{
     glLineWidth (10);
         glColor3f( 1.0, 0.0, 0.0 );
         glBegin( GL_LINES );
             glVertex3f( 0, 0, 0);
-            glVertex3f( 10, 0, 0);        
+            glVertex3f( 10, 0, 0);
         glEnd();
         glColor3f( 0.0, 1.0, 0.0 );
         glBegin( GL_LINES );
             glVertex3f( 0, 0, 0);
-            glVertex3f( 0, 10, 0);        
+            glVertex3f( 0, 10, 0);
         glEnd();
         glColor3f( 0.0, 0.0, 1.0 );
         glBegin( GL_LINES );
             glVertex3f( 0, 0, 0);
-            glVertex3f( 0, 0, 10);        
+            glVertex3f( 0, 0, 10);
         glEnd();
-    glLineWidth (1);
+    glLineWidth (3);
 }
 
 void MainCanvas::renderTestRay()
@@ -919,7 +919,7 @@ void MainCanvas::renderTestRay()
     glVertex3f( m_pos2X, m_pos2Y, m_pos2Z );
     glEnd();
     Vector dir( m_pos2X - m_pos1X, m_pos2Y - m_pos1Y, m_pos2Z - m_pos1Z );
-    SceneManager::getInstance()->getScene()->drawSphere( m_pos1X + m_hr.tmin * dir.x, 
+    SceneManager::getInstance()->getScene()->drawSphere( m_pos1X + m_hr.tmin * dir.x,
                                   m_pos1Y + m_hr.tmin * dir.y,
                                   m_pos1Z + m_hr.tmin * dir.z,
                                   3.0 * DatasetManager::getInstance()->getVoxelX() );
@@ -968,7 +968,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
     int w, h;
     GetClientSize( &w, &h );
     Quat4fT ThisQuat;
-        
+
     if ( wxGetKeyState( WXK_SHIFT ) )
     {
         m_mousePt.s.X = w / 2;
@@ -999,7 +999,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
                 Matrix3fMulMatrix3f( &m_thisRot, &m_lastRot ); // Accumulate Last Rotation Into This One
                 Matrix4fSetRotationFromMatrix3f( &transform, &m_thisRot ); // Set Our Final Transform's Rotation From This One
                 SceneManager::getInstance()->setTransform( transform );
-            } 
+            }
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().x -= voxelX;
@@ -1028,7 +1028,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().x += voxelX;
-            } 
+            }
             else
             {
                 MyApp::frame->m_pXSlider->SetValue( std::min( MyApp::frame->m_pXSlider->GetValue() + 1.0f, columns ) );
@@ -1053,12 +1053,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().y += voxelY;
-            } 
+            }
             else if( MyApp::frame->isDrawerToolActive() && MyApp::frame->getDrawSize() > 2)
             {
                 MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() - 1 );
             }
-            else 
+            else
             {
                 MyApp::frame->m_pYSlider->SetValue( std::max( 0, MyApp::frame->m_pYSlider->GetValue() - 1 ) );
             }
@@ -1082,12 +1082,12 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             else if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().y -= voxelY;
-            } 
+            }
             else if( MyApp::frame->isDrawerToolActive() )
             {
                 MyApp::frame->setDrawSize( MyApp::frame->getDrawSize() + 1 );
             }
-            else 
+            else
             {
                 MyApp::frame->m_pYSlider->SetValue( std::min( MyApp::frame->m_pYSlider->GetValue() + 1.0f, rows ) );
             }
@@ -1100,8 +1100,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().z -= voxelZ;
-            } 
-            else 
+            }
+            else
             {
                 MyApp::frame->m_pZSlider->SetValue( std::max( 0, MyApp::frame->m_pZSlider->GetValue() - 1 ) );
             }
@@ -1114,8 +1114,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.back().z += voxelZ;
-            } 
-            else 
+            }
+            else
             {
                 MyApp::frame->m_pZSlider->SetValue( std::min( MyApp::frame->m_pZSlider->GetValue() + 1.0f, frames ) );
             }
@@ -1143,8 +1143,8 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             if( SceneManager::getInstance()->isRulerActive() && !v.empty() )
             {
                 v.push_back( v.back() );
-            } 
-            else 
+            }
+            else
             {
                 v.push_back( Vector( columns * voxelX / 2.0f, rows * voxelY / 2.0f, frames * voxelZ / 2.0f ) );
             }
@@ -1152,7 +1152,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
         }
         case WXK_END:
             SceneManager::getInstance()->getRulerPts().clear();
-            break; 
+            break;
         case 'z':
         case 'Z':
             if( MyApp::frame->isDrawerToolActive() )
@@ -1165,7 +1165,7 @@ void MainCanvas::OnChar( wxKeyEvent& event )
             return;
     }
 
-    SceneManager::getInstance()->updateView( MyApp::frame->m_pXSlider->GetValue(), 
+    SceneManager::getInstance()->updateView( MyApp::frame->m_pXSlider->GetValue(),
                       MyApp::frame->m_pYSlider->GetValue(),
                       MyApp::frame->m_pZSlider->GetValue() );
     MyApp::frame->refreshAllGLWidgets();
@@ -1181,7 +1181,7 @@ float MainCanvas::getElement(int i,int j,int k, std::vector<float>* vect)
     return (*vect)[ i + ( j * columns ) + ( k * rows * columns ) ];
 }
 
-void MainCanvas::drawOnAnatomy() 
+void MainCanvas::drawOnAnatomy()
 {
     long index = MyApp::frame->getCurrentListIndex();
     Anatomy* l_currentAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( MyApp::frame->m_pListCtrl->GetItem( index ) );
@@ -1250,16 +1250,16 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
     means[0] = 0.0f;
     means[1] = 1.0f;
 
-    /* 
+    /*
     The two first means must not be equal.
-    If using Graphcut, we want the means to be chosen from the obj/bck 
+    If using Graphcut, we want the means to be chosen from the obj/bck
     */
     while(means[0] == means[1])
     {
         if( GRAPHCUT == SceneManager::getInstance()->getSegmentMethod() )
         {
             means[0] = getElement(object[0][0],object[0][1],object[0][2],src);    // Mean of the first class
-            means[1] = getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class    
+            means[1] = getElement(background[0][0],background[0][1],background[0][2],src); // // Mean of the second class
         }
     }
     if (means[0] > means[1])
@@ -1301,7 +1301,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
                 means[labelClass] = means[labelClass] + (*src)[x];
                 nbPixel[labelClass] += 1;
             }
-            
+
         }
 
         /* Step 4 : Compute average value */
@@ -1315,7 +1315,7 @@ void MainCanvas::KMeans(float means[2],float stddev[2],float apriori[2], std::ve
         lastMeans[0] = means[0];
         lastMeans[1] = means[1];
 
-        
+
     } while (!stop);
 
     /* Estimate the std dev and the proportion of each class */
@@ -1427,7 +1427,7 @@ void MainCanvas::floodFill(std::vector<float>* src, std::vector<float>* result, 
     }
 }
 
-//Segment selected area 
+//Segment selected area
 void MainCanvas::segment()
 {
     int columns = DatasetManager::getInstance()->getColumns();
